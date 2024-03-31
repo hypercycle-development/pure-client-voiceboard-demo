@@ -123,8 +123,8 @@ const setup = () => {
   directFetch("list-voices")
     .then(data => sorted(data.available_voices).forEach(voice => {
       const voice_pic = (voice in voiceToImage)
-	    ? `<img class="voice-pic" src="/static/img/${voiceToImage[voice]}" /> ${voice}`
-	    : `<img class="voice-pic" src="/static/img/default.jpg" /> ${voice}`;
+	    ? `<img class="voice-pic" src="img/${voiceToImage[voice]}" /> ${voice}`
+	    : `<img class="voice-pic" src="img/default.jpg" /> ${voice}`;
       const rad_div = document.createElement("div")
       rad_div.classList.add("form-check")
       rad_div.classList.add("col-sm-1")
