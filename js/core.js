@@ -19,9 +19,8 @@ const debounce = (func, timeout = 300) => {
   };
 }
 
-const BASE64_MARKER = ';base64,';
-
 const convertDataURIToBinary = (dataURI) => {
+  const BASE64_MARKER = ';base64,';
   var base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
   var base64 = dataURI.substring(base64Index);
   var raw = window.atob(base64);
@@ -32,6 +31,13 @@ const convertDataURIToBinary = (dataURI) => {
     array[i] = raw.charCodeAt(i);
   }
   return array;
+}
+
+const textToFilename = (text) => {
+  const textPrefix = text.toLowerCase()
+	.replace(/[^a-zA-Z ]/g, "")
+	.split(/\s+/).slice(0, 5).join("-")
+  return `voiceboard--${textPrefix}.wav`
 }
 
 const estimateText = (text) => directFetch("speak", {
@@ -76,6 +82,7 @@ const setup = () => {
   const voice_radios = byId("voice_radio_list");
   const lbl_estimate = byId("speak_estimate");
   const lbl_balance = byId("wallet_balance");
+  const save_as_link = byId("save_audio");
 
   const MMSDK = new MetaMaskSDK.MetaMaskSDK({enableDebug: false, dappMetadata: {
     name: "Example Pure JS Dapp",
@@ -160,11 +167,15 @@ const setup = () => {
     console.log("SUBMIT CLICKED");
     const voice = bySel("input[name=voice_radio]:checked").value;
     console.log(`SPEAKING: "${txt_text.value}" - ${voice}`);
-    readText(txt_text.value, voice)
+    const text = txt_text.value;
+    readText(text, voice)
       .then(snd => {
 	console.log("SPOKEN", snd)
 	btn_submit.innerHTML = "Speak";
 	btn_submit.removeAttribute("disabled");
+	const bin = convertDataURIToBinary(snd.src);
+	const fl = new File([bin], textToFilename(text));
+	save_as_link.href = URL.createObjectURL(fl);
 	audio_src.src = snd.src;
 	audio.load();
 	audio.play();
