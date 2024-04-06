@@ -154,19 +154,18 @@ const setup = () => {
     url: window.location.href,
   }});
 
-  // const updateEstimate = () => {
-  //   const textValue = txt_text.value;
-  //   return estimateText(textValue).then(data => {
-  //     if (data && data.length > 0) {
-  //       lbl_estimate.innerHTML = `Estimate: ${data[0].estimated_cost} ${data[0].currency}`;
-  //     } else {
-  //       lbl_estimate.innerHTML = 'Estimate: N/A';
-  //     }
-  //   });
-  // };
-
   const updateEstimate = () => {
-    return estimateText(txt_text.value).then(data => lbl_estimate.innerHTML = `Estimate: ${data[0].estimated_cost} ${data[0].currency}`);
+    const textValue = txt_text.value;
+    return estimateText(textValue).then(data => {
+      console.log("updateEstimate - DATA:", data);
+      if (data) {
+        lbl_estimate.innerHTML = `Estimate: ${data[0].estimated_cost} ${data[0].currency}`;
+        return true;
+      } else {
+        lbl_estimate.innerHTML = 'Estimate: N/A';
+        return false;
+      }
+    });
   };
 
   const updateBalance = () => {
