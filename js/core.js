@@ -187,7 +187,6 @@ const setup = () => {
   };
 
   console.log("Getting initial estimate and balance...");
-  updateEstimate();
   MMSDK
     .init()
     .then(data => MMSDK.getProvider().request({ method: "eth_requestAccounts", params: [] }))
@@ -196,7 +195,9 @@ const setup = () => {
       window.USER_ACCOUNTS = checks;
       return true;
     })
-    .then(_ => { updateBalance(); return nodeInfo(); })
+    .then(_ => nodeInfo())
+    .then(_ => updateEstimate())
+    .then(_ => updateBalance())
     .then(_ => {
       console.log("Fetching voices...");
       return aimFetch("list-voices", window.USER_ACCOUNTS[0]);
