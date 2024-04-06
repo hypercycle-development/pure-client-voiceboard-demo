@@ -152,8 +152,7 @@ const setup = () => {
   }});
 
   const updateEstimate = () => {
-    return estimateText(txt_text.value)
-      .then(data => lbl_estimate.innerHTML = `Estimate: ${data[0].estimated_cost} ${data[0].currency}`);
+    return estimateText(txt_text.value).then(data => lbl_estimate.innerHTML = `Estimate: ${data[0].estimated_cost} ${data[0].currency}`);
   };
 
   const updateBalance = () => {
@@ -166,8 +165,11 @@ const setup = () => {
       "tx-driver": "ethereum",
     };
     // 0xCA67B14d0793D031e996DeCfC259733c7e38c903 -- user wallet
-    return nodeFetch("balance", {method: "GET", headers: headers})
-      .then(data => lbl_balance.innerHTML = `Balance: ${data.balance[userAddress][HyPCtn]} HyPC`);
+    return nodeFetch("balance", {method: "GET", headers: headers}).then(data => {
+      const balance = `Balance: ${data.balance[userAddress][HyPCtn]} HyPC`;
+      lbl_balance.innerHTML = balance;
+      return balance;
+    });
   };
 
   const nodeInfo = () => {
