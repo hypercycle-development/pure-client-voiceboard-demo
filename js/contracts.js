@@ -220,7 +220,7 @@ const erc20ABI = [
     "type": "event"
   }
 ];
-const HyPCAddress = "0xeA7B7DC089c9a4A916B5a7a37617f59fD54e37E4"
-const HyPCtn = "0x640b1274387bf529D016d74161D09c13951867E8"
-const web3 = new Web3(window.ethereum)
+const HyPCAddress = "0xeA7B7DC089c9a4A916B5a7a37617f59fD54e37E4";
+const HyPCtn = "0x640b1274387bf529D016d74161D09c13951867E8";
+const web3 = new Web3(window.ethereum);
 const HyPCContract = new web3.eth.Contract(erc20ABI, HyPCAddress);

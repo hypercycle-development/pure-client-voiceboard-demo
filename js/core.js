@@ -1,7 +1,3 @@
-const api_health = () => fetch("/v0/health")
-      .then(res => res.json())
-      .then(data => console.log(data))
-
 const byId = id => document.getElementById(id);
 const bySel = selector => document.querySelector(selector);
 
@@ -185,7 +181,6 @@ const setup = () => {
 
 window.addEventListener("DOMContentLoaded", () => {
   console.log("HELLO FROM THE LOADED EVENT!")
-  api_health()
   console.log("Got health response, setting up...")
   setup()
 })
