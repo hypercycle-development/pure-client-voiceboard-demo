@@ -106,8 +106,7 @@ const estimateText = (text) => {
   return aimFetch("speak", window.USER_ACCOUNTS[0], {
     method: "POST",
     headers: {"Content-Type": "application/json", "cost_only": "1"},
-    body: JSON.stringify({text: text, voice: "freeman"})})
-    .then(data => data.costs);
+    body: JSON.stringify({text: text, voice: "freeman"})});
 }
 
 const readText = (text, voice) => {
@@ -133,8 +132,8 @@ const voiceToImage = {
 };
 
 const sorted = (array) => {
-  const sorted = array.slice().sort();
-  return sorted;
+  const res = array.slice().sort();
+  return res;
 };
 
 const setup = () => {
@@ -155,17 +154,7 @@ const setup = () => {
   }});
 
   const updateEstimate = () => {
-    const textValue = txt_text.value;
-    return estimateText(textValue).then(data => {
-      console.log("updateEstimate - DATA:", data);
-      if (data) {
-        lbl_estimate.innerHTML = `Estimate: ${data[0].estimated_cost} ${data[0].currency}`;
-        return true;
-      } else {
-        lbl_estimate.innerHTML = 'Estimate: N/A';
-        return false;
-      }
-    });
+    return estimateText(txt_text.value).then(data => lbl_estimate.innerHTML = `Estimate: ${data[0].estimated_cost} ${data[0].currency}`);
   };
 
   const updateBalance = () => {
@@ -179,7 +168,7 @@ const setup = () => {
     };
     // 0xCA67B14d0793D031e996DeCfC259733c7e38c903 -- user wallet
     return nodeFetch("balance", {method: "GET", headers: headers}).then(data => {
-      const balance = `Balance: ${data.balance[userAddress][HyPCtn]} HyPC`;
+      const balance = `Balance: ${((data.balance[userAddress] || {})[HyPCtn]) || 0} HyPC`;
       lbl_balance.innerHTML = balance;
       return balance;
     });
@@ -218,6 +207,7 @@ const setup = () => {
       return aimFetch("list-voices", window.USER_ACCOUNTS[0]);
     })
     .then(data => sorted(data.available_voices).forEach(voice => {
+      console.log("Fetched voices:", data);
       const voice_pic = (voice in voiceToImage)
 	    ? `<img class="voice-pic" src="img/${voiceToImage[voice]}" /> ${voice}`
 	    : `<img class="voice-pic" src="img/default.jpg" /> ${voice}`;
