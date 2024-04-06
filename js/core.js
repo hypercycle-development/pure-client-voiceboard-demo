@@ -102,17 +102,20 @@ const textToFilename = (text) => {
   return `voiceboard--${textPrefix}.wav`;
 };
 
-const estimateText = (text) => aimFetch("speak", window.USER_ACCOUNTS[0], {
-  method: "POST",
-  headers: {"Content-Type": "application/json", "cost_only": "1"},
-  body: JSON.stringify({text: text, voice: "freeman"})})
-      .then(data => data.costs);
+const estimateText = (text) => {
+  return aimFetch("speak", window.USER_ACCOUNTS[0], {
+    method: "POST",
+    headers: {"Content-Type": "application/json", "cost_only": "1"},
+    body: JSON.stringify({text: text, voice: "freeman"})})
+    .then(data => data.costs);
+}
 
-const readText = (text, voice) => aimFetch("speak", window.USER_ACCOUNTS[0], {
-  method: "POST",
-  headers: {"Content-Type": "application/json"},
-  body: JSON.stringify({text: text, voice: voice})})
-      .then(data => new Audio("data:audio/wav;base64," + data.file));
+const readText = (text, voice) => {
+  aimFetch("speak", window.USER_ACCOUNTS[0], {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({text: text, voice: voice})}).then(data => new Audio("data:audio/wav;base64," + data.file));
+}
 
 const voiceToImage = {
   "applejack": "applejack.png",
@@ -150,6 +153,17 @@ const setup = () => {
     name: "Example Pure JS Dapp",
     url: window.location.href,
   }});
+
+  // const updateEstimate = () => {
+  //   const textValue = txt_text.value;
+  //   return estimateText(textValue).then(data => {
+  //     if (data && data.length > 0) {
+  //       lbl_estimate.innerHTML = `Estimate: ${data[0].estimated_cost} ${data[0].currency}`;
+  //     } else {
+  //       lbl_estimate.innerHTML = 'Estimate: N/A';
+  //     }
+  //   });
+  // };
 
   const updateEstimate = () => {
     return estimateText(txt_text.value).then(data => lbl_estimate.innerHTML = `Estimate: ${data[0].estimated_cost} ${data[0].currency}`);
