@@ -66,11 +66,11 @@ const aimFetch = (endpoint, userAddress, options) => {
       .then(data => {
         hdrs["tx-nonce"] = data.message;
         hdrs["tx-signature"] = data.signature;
-        return fetch(url, opts);
+        return fetch(url, opts).then(res => res.json());
       });
   }
 
-  return fetch(url, opts);
+  return fetch(url, opts).then(res => res.json());
 };
 
 const debounce = (func, timeout = 300) => {
@@ -107,13 +107,14 @@ const estimateText = (text) => {
     method: "POST",
     headers: {"Content-Type": "application/json", "cost_only": "1"},
     body: JSON.stringify({text: text, voice: "freeman"})});
-}
+};
 
 const readText = (text, voice) => {
   aimFetch("speak", window.USER_ACCOUNTS[0], {
     method: "POST",
     headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({text: text, voice: voice})}).then(data => new Audio("data:audio/wav;base64," + data.file));
+    body: JSON.stringify({text: text, voice: voice})})
+    .then(data => new Audio("data:audio/wav;base64," + data.file));
 }
 
 const voiceToImage = {
@@ -154,7 +155,8 @@ const setup = () => {
   }});
 
   const updateEstimate = () => {
-    return estimateText(txt_text.value).then(data => lbl_estimate.innerHTML = `Estimate: ${data[0].estimated_cost} ${data[0].currency}`);
+    return estimateText(txt_text.value)
+      .then(data => lbl_estimate.innerHTML = `Estimate: ${data.HyPC.estimated_cost} HyPC`);
   };
 
   const updateBalance = () => {
