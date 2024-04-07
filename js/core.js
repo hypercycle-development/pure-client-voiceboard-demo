@@ -61,16 +61,16 @@ const aimFetch = (endpoint, userAddress, options) => {
         : {method: method, headers: hdrs, body: options.body};
 
   console.log("ENDPOINT: ~", endpoint, "~");
-  if (!options.isPublic && !options.costOnly && !endpoint.endsWith("/manifest.json")) {
-    return fetchSignedNonce(userAddress)
-      .then(data => {
-        hdrs["tx-nonce"] = data.message;
-        hdrs["tx-signature"] = data.signature;
-        return fetch(url, opts).then(res => res.json());
-      });
+  if (options.isPublic || options.costOnly || endpoint.endsWith("/manifest.json")) {
+    return fetch(url, opts).then(res => res.json());
   }
-
-  return fetch(url, opts).then(res => res.json());
+  return fetchSignedNonce(userAddress)
+    .then(data => {
+      hdrs["tx-nonce"] = data.message;
+      hdrs["tx-signature"] = data.signature;
+      return fetch(url, opts);
+    })
+    .then(res => res.json());
 };
 
 const debounce = (func, timeout = 300) => {
@@ -105,8 +105,9 @@ const textToFilename = (text) => {
 const estimateText = (text) => {
   return aimFetch("speak", window.USER_ACCOUNTS[0], {
     method: "POST",
-    headers: {"Content-Type": "application/json", "cost_only": "1"},
-    body: JSON.stringify({text: text, voice: "freeman"})});
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({text: text, voice: "freeman"}),
+    costOnly: true});
 };
 
 const readText = (text, voice) => {
