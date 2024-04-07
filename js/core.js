@@ -102,21 +102,17 @@ const textToFilename = (text) => {
   return `voiceboard--${textPrefix}.wav`;
 };
 
-const estimateText = (text) => {
-  return aimFetch("speak", window.USER_ACCOUNTS[0], {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({text: text, voice: "freeman"}),
-    costOnly: true});
-};
+const estimateText = (text) => aimFetch("speak", window.USER_ACCOUNTS[0], {
+  method: "POST",
+  headers: {"Content-Type": "application/json"},
+  body: JSON.stringify({text: text, voice: "freeman"}),
+  costOnly: true});
 
-const readText = (text, voice) => {
-  aimFetch("speak", window.USER_ACCOUNTS[0], {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({text: text, voice: voice})})
-    .then(data => new Audio("data:audio/wav;base64," + data.file));
-}
+const readText = (text, voice) => aimFetch("speak", window.USER_ACCOUNTS[0], {
+  method: "POST",
+  headers: {"Content-Type": "application/json"},
+  body: JSON.stringify({text: text, voice: voice})})
+      .then(data => new Audio("data:audio/wav;base64," + data.file));
 
 const voiceToImage = {
   "applejack": "applejack.png",
@@ -235,6 +231,7 @@ const setup = () => {
     const voice = bySel("input[name=voice_radio]:checked").value;
     console.log(`SPEAKING: "${txt_text.value}" - ${voice}`);
     const text = txt_text.value;
+
     readText(text, voice)
       .then(snd => {
 	console.log("SPOKEN", snd);
