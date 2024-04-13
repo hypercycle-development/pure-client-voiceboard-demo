@@ -4,6 +4,41 @@ const bySel = selector => document.querySelector(selector);
 const NODE = "52.88.200.3:8000";
 const nodeFetch = (endpoint, options) => fetch(`http://${NODE}/${endpoint}`, options).then(res => res.json());
 
+const sendHyPCToNode = (value) => {
+  const nodeAddress = window.NODE_INFO.tm.address;
+  const userAddress = window.USER_ACCOUNTS[0];
+  HyPCContract.methods.transfer(nodeAddress, value).send({"from": userAddress})
+    .then(tx => {
+      const headers = {
+        "tx-sender": userAddress,
+        "tx-origin": userAddress,
+        "hypc-program": "",
+        "currency-type": HyPCAddress,
+        "tx-driver": "ethereum",
+        "tx-value": value,
+        "tx-id": tx.transactionHash
+      };
+      return nodeFetch("balance", {method: "POST", headers: headers});
+    });
+};
+
+const nodeInfo = () => {
+  const userAddress = window.USER_ACCOUNTS[0];
+  const headers = {
+    "tx-sender": userAddress,
+    "tx-origin": userAddress,
+    "hypc-program": "",
+    "currency-type": HyPCAddress,
+    "tx-driver": "ethereum",
+  };
+  return nodeFetch("info", {method: "GET", headers: headers})
+    .then(data => {
+      window.NODE_INFO = data;
+      window.AIM = data.aim.aims.find(aim => aim.image_name == "tortoise-tts");
+      return data;
+    });
+};
+
 const ASCIItoHex = (ascii) => {
   let hex = '';
   let tASCII, Hex;
@@ -18,10 +53,11 @@ const ASCIItoHex = (ascii) => {
 
 const personalSign = (message, address) => {
   const msg = `0x${ASCIItoHex(message)}`;
-  return window.ethereum.request({method: "personal_sign", params: [msg, address]}).then(data => {
-    console.log("GOT SIGNED MESSAGE:", message, "SIG:", data);
-    return {message: message, signature: data};
-  });
+  return window.ethereum.request({method: "personal_sign", params: [msg, address]})
+    .then(data => {
+      console.log("GOT SIGNED MESSAGE:", message, "SIG:", data);
+      return {message: message, signature: data};
+    });
 };
 
 const fetchSignedNonce = (userAddress) => fetch(`http:${NODE}/nonce`, {method: "GET", headers: {sender: userAddress}})
@@ -166,26 +202,10 @@ const setup = () => {
       "tx-driver": "ethereum",
     };
     return nodeFetch("balance", {method: "GET", headers: headers}).then(data => {
-      const balance = `Balance: ${((data.balance[userAddress] || {})[HyPCAddress]) || 0} HyPC`;
+      const balance = `Balance: ${((data.balance[userAddress] || {})['HyPC']) || 0} HyPC`;
       lbl_balance.innerHTML = balance;
       return balance;
     });
-  };
-
-  const nodeInfo = () => {
-    const userAddress = window.USER_ACCOUNTS[0];
-    const headers = {
-      "tx-sender": userAddress,
-      "tx-origin": userAddress,
-      "hypc-program": "",
-      "currency-type": HyPCAddress,
-      "tx-driver": "ethereum",
-    };
-    return nodeFetch("info", {method: "GET", headers: headers})
-      .then(data => {
-	window.NODE_INFO = data;
-	window.AIM = data.aim.aims.find(aim => aim.image_name == "tortoise-tts");
-      });
   };
 
   console.log("Getting initial estimate and balance...");
