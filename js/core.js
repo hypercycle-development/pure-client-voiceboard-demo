@@ -165,9 +165,8 @@ const setup = () => {
       "currency-type": HyPCAddress,
       "tx-driver": "ethereum",
     };
-    // 0xCA67B14d0793D031e996DeCfC259733c7e38c903 -- user wallet
     return nodeFetch("balance", {method: "GET", headers: headers}).then(data => {
-      const balance = `Balance: ${((data.balance[userAddress] || {})[HyPCtn]) || 0} HyPC`;
+      const balance = `Balance: ${((data.balance[userAddress] || {})[HyPCAddress]) || 0} HyPC`;
       lbl_balance.innerHTML = balance;
       return balance;
     });
