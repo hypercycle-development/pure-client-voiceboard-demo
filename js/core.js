@@ -243,6 +243,11 @@ const setup = () => {
 	audio_src.src = snd.src;
 	audio.load();
 	audio.play();
+      })
+      .catch(err => {
+        console.log("FAILED", err);
+        btn_submit.innerHTML = "Speak";
+	btn_submit.removeAttribute("disabled");
       });
   });
 };
