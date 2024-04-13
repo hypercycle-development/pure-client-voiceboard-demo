@@ -262,6 +262,7 @@ const setup = () => {
 	audio_src.src = snd.src;
 	audio.load();
 	audio.play();
+        return updateBalance();
       })
       .catch(err => {
         console.log("FAILED", err);
