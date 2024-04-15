@@ -4,6 +4,11 @@ const bySel = selector => document.querySelector(selector);
 const NODE = "52.88.200.3:8000";
 const nodeFetch = (endpoint, options) => fetch(`http://${NODE}/${endpoint}`, options).then(res => res.json());
 
+const MMSDK = new MetaMaskSDK.MetaMaskSDK({enableDebug: false, dappMetadata: {
+  name: "Example Pure JS Dapp",
+  url: window.location.href,
+}});
+
 const updateNodeFromTxn = (userAddress, txId, value) => {
   const headers = {
     "tx-sender": userAddress,
@@ -183,11 +188,6 @@ const setup = () => {
   const lbl_estimate = byId("speak_estimate");
   const lbl_balance = byId("wallet_balance");
   const save_as_link = byId("save_audio");
-
-  const MMSDK = new MetaMaskSDK.MetaMaskSDK({enableDebug: false, dappMetadata: {
-    name: "Example Pure JS Dapp",
-    url: window.location.href,
-  }});
 
   const updateEstimate = () => {
     return estimateText(txt_text.value)
