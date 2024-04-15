@@ -4,22 +4,24 @@ const bySel = selector => document.querySelector(selector);
 const NODE = "52.88.200.3:8000";
 const nodeFetch = (endpoint, options) => fetch(`http://${NODE}/${endpoint}`, options).then(res => res.json());
 
+const updateNodeFromTxn = (userAddress, txId, value) => {
+  const headers = {
+    "tx-sender": userAddress,
+    "tx-origin": userAddress,
+    "hypc-program": "",
+    "currency-type": "HyPC",
+    "tx-driver": "ethereum",
+    "tx-value": value,
+    "tx-id": txId
+  };
+  return nodeFetch("balance", {method: "POST", headers: headers});
+};
+
 const sendHyPCToNode = (value) => {
   const nodeAddress = window.NODE_INFO.tm.address;
   const userAddress = window.USER_ACCOUNTS[0];
   HyPCContract.methods.transfer(nodeAddress, value).send({"from": userAddress})
-    .then(tx => {
-      const headers = {
-        "tx-sender": userAddress,
-        "tx-origin": userAddress,
-        "hypc-program": "",
-        "currency-type": HyPCAddress,
-        "tx-driver": "ethereum",
-        "tx-value": value,
-        "tx-id": tx.transactionHash
-      };
-      return nodeFetch("balance", {method: "POST", headers: headers});
-    });
+    .then(tx => updateNodeFromTxn(userAddress, tx.id, value));
 };
 
 const nodeInfo = () => {
