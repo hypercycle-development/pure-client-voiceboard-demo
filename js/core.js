@@ -1,7 +1,7 @@
 const byId = id => document.getElementById(id);
 const bySel = selector => document.querySelector(selector);
 
-const NODE = "52.88.200.3:8000";
+const NODE = "voiceboard.hypercycle.io:8000";
 const nodeFetch = (endpoint, options) => fetch(`http://${NODE}/${endpoint}`, options).then(res => res.json());
 
 const MMSDK = new MetaMaskSDK.MetaMaskSDK({enableDebug: false, dappMetadata: {
