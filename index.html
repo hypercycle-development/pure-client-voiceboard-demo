@@ -3,6 +3,7 @@
     <title>Voiceboard Demo</title>
     <script src="js/metamask-sdk.js"></script>
     <script src="js/web3.min.js"></script>
+    <script src="js/ethers.min.js"></script>
     <script src="js/contracts.js"></script>
     <script src="js/core.js"></script>
     <link
@@ -38,10 +39,13 @@
 	<div class="row mb-3 col-12">
 	  <div class="d-grid gap-2 col-6" id="node_wallet">
 	  </div>
-	  <div class="d-grid gap-2 col-3">
-	    <input id="transaction_id" />
+	  <div class="d-grid gap-2 col-2">
+	    <input id="transaction_id" placeholder="Transaction ID" />
 	  </div>
-	  <div class="d-grid gap-2 col-3">
+	  <div class="d-grid gap-2 col-2">
+	    <input id="transaction_value" placeholder="Value" />
+	  </div>
+	  <div class="d-grid gap-2 col-2">
 	    <button id="update_balance" class="btn btn-secondary">
 	      Update Balance
 	    </button>
