@@ -2,7 +2,7 @@ const byId = id => document.getElementById(id);
 const bySel = selector => document.querySelector(selector);
 
 const NODE = "voiceboard.hypercycle.io:8000";
-const nodeFetch = (endpoint, options) => fetch(`https://${NODE}/${endpoint}`, options).then(res => res.json());
+const nodeFetch = (endpoint, options) => fetch(`http://${NODE}/${endpoint}`, options).then(res => res.json());
 
 const MMSDK = new MetaMaskSDK.MetaMaskSDK({enableDebug: false, dappMetadata: {
   name: "Example Pure JS Dapp",
@@ -22,11 +22,29 @@ const updateNodeFromTxn = (userAddress, txId, value) => {
   return nodeFetch("balance", {method: "POST", headers: headers});
 };
 
-const sendHyPCToNode = (value) => {
+const NETWORK_IDS = {
+  mainnet: 1,
+  goerli: 5,
+  sepolia: 11155111
+};
+
+const sendHyPC2 = (value) => {
   const nodeAddress = window.NODE_INFO.tm.address;
   const userAddress = window.USER_ACCOUNTS[0];
-  HyPCContract.methods.transfer(nodeAddress, value).send({"from": userAddress})
-    .then(tx => updateNodeFromTxn(userAddress, tx.id, value));
+  return HyPCContract.methods.decimals().call()
+    .then(dec => HyPCContract.methods.transfer(nodeAddress, value * (10 ** dec)).send({"from": userAddress}))
+    // .then(tx => window.ethereum.request(
+    //   {method: "eth_sendTransaction",
+    //    params: [{
+    //      from: USER_ACCOUNTS[0],
+    //      to: NODE_INFO.tm.address,
+    //      data: tx,
+    //      gasLimit: '0x5028',
+    //      maxPriorityFeePerGas: '0x3b9aca00',
+    //      maxFeePerGas: '0x2540be400',
+    //    }]}))
+    .then(tx => console.log(txHash));
+    // .then(tx => updateNodeFromTxn(userAddress, tx.id, value));
 };
 
 const nodeInfo = () => {
@@ -67,7 +85,7 @@ const personalSign = (message, address) => {
     });
 };
 
-const fetchSignedNonce = (userAddress) => fetch(`https:${NODE}/nonce`, {method: "GET", headers: {sender: userAddress}})
+const fetchSignedNonce = (userAddress) => fetch(`http:${NODE}/nonce`, {method: "GET", headers: {sender: userAddress}})
       .then(res => {
         console.log("GOT NONCE", res);
         return res.json();
@@ -97,7 +115,7 @@ const aimFetch = (endpoint, userAddress, options) => {
   }
   const hdrs = Object.assign({}, options.headers, headers);
 
-  const url = `https://${NODE}/aim/0/${endpoint}`;
+  const url = `http://${NODE}/aim/0/${endpoint}`;
   const method = options.method || "GET";
   const opts = (method === "GET" || method === "HEAD")
         ?  {method: method, headers: hdrs}
@@ -188,6 +206,15 @@ const setup = () => {
   const lbl_estimate = byId("speak_estimate");
   const lbl_balance = byId("wallet_balance");
   const save_as_link = byId("save_audio");
+
+  const txt_node_wallet = byId("node_wallet");
+  const inp_tx_id = byId("transaction_id");
+  const btn_update_balance = byId("update_balance");
+
+  btn_update_balance.addEventListener("click", ev => {
+    ev.preventDefault();
+    console.log("UPDATING BALANCE:", inp_tx_id.value);
+  });
 
   const updateEstimate = () => {
     return estimateText(txt_text.value)
