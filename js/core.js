@@ -202,8 +202,8 @@ const setup = () => {
   };
 
   const setBalance = (balance) => {
-    const balance = `Balance: ${balance} HyPC`;
-    lbl_balance.innerHTML = balance;
+    const balance_str = `Balance: ${balance} HyPC`;
+    lbl_balance.innerHTML = balance_str;
     return balance;
   };
 
