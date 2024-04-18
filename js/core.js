@@ -201,6 +201,12 @@ const setup = () => {
       .then(data => lbl_estimate.innerHTML = `Estimate: ${data.HyPC.estimated_cost} HyPC`);
   };
 
+  const setBalance = (balance) => {
+    const balance = `Balance: ${balance} HyPC`;
+    lbl_balance.innerHTML = balance;
+    return balance;
+  };
+
   const updateBalance = () => {
     const userAddress = window.USER_ACCOUNTS[0];
     const headers = {
@@ -210,18 +216,18 @@ const setup = () => {
       "currency-type": "HyPC",
       "tx-driver": "ethereum",
     };
-    return nodeFetch("balance", {method: "GET", headers: headers}).then(data => {
-      const balance = `Balance: ${((data.balance[userAddress] || {})['HyPC']) || 0} HyPC`;
-      lbl_balance.innerHTML = balance;
-      return balance;
-    });
+    return nodeFetch("balance", {method: "GET", headers: headers})
+      .then(data => setBalance(((data.balance[userAddress] || {})['HyPC']) || 0));
   };
 
   btn_update_balance.addEventListener("click", ev => {
     ev.preventDefault();
-    sendHyPC(parseInt(inp_tx_val.value))
+    return sendHyPC(parseInt(inp_tx_val.value))
       .then(res => { console.log("BALANCE UPDATED", res); return res; } )
-      .then(res => updateBalance());
+      .then(res => {
+        console.log("Request returned...");
+        updateBalance();
+      });
   });
 
   console.log("Getting initial estimate and balance...");
