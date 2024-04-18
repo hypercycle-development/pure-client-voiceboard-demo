@@ -1,8 +1,8 @@
 const byId = id => document.getElementById(id);
 const bySel = selector => document.querySelector(selector);
 
-const NODE = "voiceboard.hypercycle.io:8000";
-const nodeFetch = (endpoint, options) => fetch(`http://${NODE}/${endpoint}`, options).then(res => res.json());
+const NODE = "voiceboard.hypercycle.io";
+const nodeFetch = (endpoint, options) => fetch(`https://${NODE}/${endpoint}`, options).then(res => res.json());
 
 const MMSDK = new MetaMaskSDK.MetaMaskSDK({enableDebug: false, dappMetadata: {
   name: "Example Pure JS Dapp",
@@ -71,7 +71,7 @@ const personalSign = (message, address) => {
     });
 };
 
-const fetchSignedNonce = (userAddress) => fetch(`http:${NODE}/nonce`, {method: "GET", headers: {sender: userAddress}})
+const fetchSignedNonce = (userAddress) => fetch(`https://${NODE}/nonce`, {method: "GET", headers: {sender: userAddress}})
       .then(res => {
         console.log("GOT NONCE", res);
         return res.json();
@@ -101,7 +101,7 @@ const aimFetch = (endpoint, userAddress, options) => {
   }
   const hdrs = Object.assign({}, options.headers, headers);
 
-  const url = `http://${NODE}/aim/0/${endpoint}`;
+  const url = `https://${NODE}/aim/0/${endpoint}`;
   const method = options.method || "GET";
   const opts = (method === "GET" || method === "HEAD")
         ?  {method: method, headers: hdrs}
