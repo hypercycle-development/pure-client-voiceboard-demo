@@ -10,6 +10,7 @@ const MMSDK = new MetaMaskSDK.MetaMaskSDK({enableDebug: false, dappMetadata: {
 }});
 
 const HyPCDec = 6;
+// HyPCContract.methods.decimals().call().then(dec => )
 
 const updateNodeFromTxn = (userAddress, txId, value) => {
   const headers = {
@@ -18,7 +19,6 @@ const updateNodeFromTxn = (userAddress, txId, value) => {
     "hypc-program": "",
     "currency-type": "HyPC",
     "tx-driver": "ethereum",
-    "tx-value": value * (10 ** HyPCDec),
     "tx-id": txId
   };
   return nodeFetch("balance", {method: "POST", headers: headers});
@@ -27,7 +27,6 @@ const updateNodeFromTxn = (userAddress, txId, value) => {
 const sendHyPC = (value) => {
   const nodeAddress = window.NODE_INFO.tm.address;
   const userAddress = window.USER_ACCOUNTS[0];
-  // HyPCContract.methods.decimals().call().then(dec => )
   return HyPCContract.methods.transfer(nodeAddress, value * (10 ** HyPCDec))
     .send({from: userAddress})
     .then(tx => { console.log(tx); return tx; })
@@ -40,7 +39,7 @@ const nodeInfo = () => {
     "tx-sender": userAddress,
     "tx-origin": userAddress,
     "hypc-program": "",
-    "currency-type": HyPCAddress,
+    "currency-type": "HyPC",
     "tx-driver": "ethereum",
   };
   return nodeFetch("info", {method: "GET", headers: headers})
@@ -87,7 +86,7 @@ const aimFetch = (endpoint, userAddress, options) => {
     "tx-sender": userAddress,
     "tx-origin": userAddress,
     "hypc-program": "",
-    "currency-type": HyPCAddress,
+    "currency-type": "HyPC",
     "tx-driver": "ethereum"
   };
   if (options.txValue) {
@@ -208,7 +207,7 @@ const setup = () => {
       "tx-sender": userAddress,
       "tx-origin": userAddress,
       "hypc-program": "",
-      "currency-type": HyPCAddress,
+      "currency-type": "HyPC",
       "tx-driver": "ethereum",
     };
     return nodeFetch("balance", {method: "GET", headers: headers}).then(data => {
