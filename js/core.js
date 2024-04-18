@@ -9,6 +9,8 @@ const MMSDK = new MetaMaskSDK.MetaMaskSDK({enableDebug: false, dappMetadata: {
   url: window.location.href,
 }});
 
+const HyPCDec = 6;
+
 const updateNodeFromTxn = (userAddress, txId, value) => {
   const headers = {
     "tx-sender": userAddress,
@@ -16,35 +18,20 @@ const updateNodeFromTxn = (userAddress, txId, value) => {
     "hypc-program": "",
     "currency-type": "HyPC",
     "tx-driver": "ethereum",
-    "tx-value": value,
+    "tx-value": value * (10 ** HyPCDec),
     "tx-id": txId
   };
   return nodeFetch("balance", {method: "POST", headers: headers});
 };
 
-const NETWORK_IDS = {
-  mainnet: 1,
-  goerli: 5,
-  sepolia: 11155111
-};
-
-const sendHyPC2 = (value) => {
+const sendHyPC = (value) => {
   const nodeAddress = window.NODE_INFO.tm.address;
   const userAddress = window.USER_ACCOUNTS[0];
-  return HyPCContract.methods.decimals().call()
-    .then(dec => HyPCContract.methods.transfer(nodeAddress, value * (10 ** dec)).send({"from": userAddress}))
-    // .then(tx => window.ethereum.request(
-    //   {method: "eth_sendTransaction",
-    //    params: [{
-    //      from: USER_ACCOUNTS[0],
-    //      to: NODE_INFO.tm.address,
-    //      data: tx,
-    //      gasLimit: '0x5028',
-    //      maxPriorityFeePerGas: '0x3b9aca00',
-    //      maxFeePerGas: '0x2540be400',
-    //    }]}))
-    .then(tx => console.log(txHash));
-    // .then(tx => updateNodeFromTxn(userAddress, tx.id, value));
+  // HyPCContract.methods.decimals().call().then(dec => )
+  return HyPCContract.methods.transfer(nodeAddress, value * (10 ** HyPCDec))
+    .send({"from": userAddress})
+    .then(tx => { console.log(tx); return tx; })
+    .then(tx => updateNodeFromTxn(userAddress, tx.transactionHash, value));
 };
 
 const nodeInfo = () => {
@@ -207,14 +194,8 @@ const setup = () => {
   const lbl_balance = byId("wallet_balance");
   const save_as_link = byId("save_audio");
 
-  const txt_node_wallet = byId("node_wallet");
-  const inp_tx_id = byId("transaction_id");
+  const inp_tx_val = byId("transaction_value");
   const btn_update_balance = byId("update_balance");
-
-  btn_update_balance.addEventListener("click", ev => {
-    ev.preventDefault();
-    console.log("UPDATING BALANCE:", inp_tx_id.value);
-  });
 
   const updateEstimate = () => {
     return estimateText(txt_text.value)
@@ -236,6 +217,13 @@ const setup = () => {
       return balance;
     });
   };
+
+  btn_update_balance.addEventListener("click", ev => {
+    ev.preventDefault();
+    sendHyPC(parseInt(inp_tx_val.value))
+      .then(res => { console.log("BALANCE UPDATED", res); return res; } )
+      .then(res => updateBalance());
+  });
 
   console.log("Getting initial estimate and balance...");
   MMSDK
