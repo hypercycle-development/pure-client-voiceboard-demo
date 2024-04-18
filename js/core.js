@@ -29,7 +29,7 @@ const sendHyPC = (value) => {
   const userAddress = window.USER_ACCOUNTS[0];
   // HyPCContract.methods.decimals().call().then(dec => )
   return HyPCContract.methods.transfer(nodeAddress, value * (10 ** HyPCDec))
-    .send({"from": userAddress})
+    .send({from: userAddress})
     .then(tx => { console.log(tx); return tx; })
     .then(tx => updateNodeFromTxn(userAddress, tx.transactionHash, value));
 };
