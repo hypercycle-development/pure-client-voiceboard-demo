@@ -395,7 +395,7 @@ const HyPCeth = (NODE, appName) => {
           const name = toSnakeCase(aim.image_name);
           memo[name] = {info: aim,
                         fetchEstimate: (endpoint, data) => {
-                          return aimFetch(endpoint, userAddress, {
+                          return aimFetch(aim.slot, endpoint, userAddress, {
                             method: "POST",
                             headers: {"Content-Type": "application/json"},
                             body: JSON.stringify(data),
@@ -403,7 +403,7 @@ const HyPCeth = (NODE, appName) => {
                           });
                         },
                         fetchResult: (endpoint, data) => {
-                          return aimFetch(endpoint, userAddress, {
+                          return aimFetch(aim.slot, endpoint, userAddress, {
                             method: "POST",
                             headers: {"Content-Type": "application/json"},
                             body: JSON.stringify(data),
@@ -456,13 +456,13 @@ const HyPCeth = (NODE, appName) => {
     internals: {
       contract: HyPCContract,
       nodeFetch: nodeFetch,
-      aimFetch: (endpoint, options) => aimFetch(endpoint, USER_ACCOUNTS[0], options),
+      aimFetch: (aimSlot, endpoint, options) => aimFetch(aimSlot, endpoint, USER_ACCOUNTS[0], options),
       nodeInfo: () => NODE_INFO,
       init: init,
     },
     aims: () => AIMS,
     sendToNode: sendHyPC,
     fetchBalance: fetchBalance,
-    version: "0.0.3"
+    version: "0.0.4"
   };
 };
