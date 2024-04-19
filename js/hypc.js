@@ -1,4 +1,8 @@
-const HyPCeth = (NODE) => {
+const HyPCeth = (NODE, appName) => {
+  if (appName === undefined) {
+    appName = "HyPC Serverless App";
+  }
+
   const erc20ABI = [
     {
       "constant": true,
@@ -252,14 +256,12 @@ const HyPCeth = (NODE) => {
 
   const nodeFetch = (endpoint, options) => fetch(`${NODE}/${endpoint}`, options).then(res => res.json());
 
-  const MMSDK = new MetaMaskSDK.MetaMaskSDK({enableDebug: false, dappMetadata: {
-    name: "HyPC Serverles App",
-    url: window.location.href,
-  }});
+  const MMSDK = null;
 
   const HyPCDec = 6;
   let NODE_INFO = {};
   let USER_ACCOUNTS = [];
+  let AIMS = {};
 
   const ASCIItoHex = (ascii) => {
     let hex = '';
@@ -272,6 +274,13 @@ const HyPCeth = (NODE) => {
     hex = hex.trim();
     return hex;
   };
+
+  function toSnakeCase(str) {
+    return str
+      .replace(/[\W_]+/g, '_')
+      .replace(/^_+|_+$/g, '')
+      .toLowerCase();
+  }
 
   const convertDataURIToBinary = (dataURI) => {
     const BASE64_MARKER = ';base64,';
@@ -305,7 +314,14 @@ const HyPCeth = (NODE) => {
     return HyPCContract.methods.transfer(nodeAddress, value * (10 ** HyPCDec))
       .send({from: userAddress})
       .then(tx => { console.log(tx); return tx; })
-      .then(tx => updateNodeFromTxn(userAddress, tx.transactionHash, value));
+      .then(tx => updateNodeFromTxn(userAddress, tx.transactionHash, value))
+      .then(dat => {
+        const bal = dat.balance[userAddress];
+        if (dat.verified === "true") {
+          return {balance: bal, status: "ok"};
+        }
+        return {balance: bal, status: "error", error: dat.verification_message};
+      });
   };
 
   const personalSign = (message, address) => {
@@ -322,23 +338,7 @@ const HyPCeth = (NODE) => {
         })
         .then(data => personalSign(data.nonce, userAddress));
 
-  const nodeInfo = (userAddress) => {
-    const headers = {
-      "tx-sender": userAddress,
-      "tx-origin": userAddress,
-      "hypc-program": "",
-      "currency-type": "HyPC",
-      "tx-driver": "ethereum",
-    };
-    return nodeFetch("info", {method: "GET", headers: headers})
-      .then(data => {
-        NODE_INFO = data;
-        // window.AIM = data.aim.aims.find(aim => aim.image_name == "tortoise-tts");
-        return data;
-      });
-  };
-
-  const aimFetch = (endpoint, userAddress, options) => {
+  const aimFetch = (aimSlot, endpoint, userAddress, options) => {
     if (options === undefined) {
       options = {};
     }
@@ -361,7 +361,7 @@ const HyPCeth = (NODE) => {
     }
     const hdrs = Object.assign({}, options.headers, headers);
 
-    const url = `${NODE}/aim/0/${endpoint}`;
+    const url = `${NODE}/aim/${aimSlot}/${endpoint}`;
     const method = options.method || "GET";
     const opts = (method === "GET" || method === "HEAD")
           ?  {method: method, headers: hdrs}
@@ -380,6 +380,40 @@ const HyPCeth = (NODE) => {
       .then(res => res.json());
   };
 
+  const nodeInfo = (userAddress) => {
+    const headers = {
+      "tx-sender": userAddress,
+      "tx-origin": userAddress,
+      "hypc-program": "",
+      "currency-type": "HyPC",
+      "tx-driver": "ethereum",
+    };
+    return nodeFetch("info", {method: "GET", headers: headers})
+      .then(data => {
+        NODE_INFO = data;
+        AIMS = data.aim.aims.reduce((memo, aim) => {
+          const name = toSnakeCase(aim.image_name);
+          memo[name] = {info: aim,
+                        fetchEstimate: (endpoint, data) => {
+                          return aimFetch(endpoint, userAddress, {
+                            method: "POST",
+                            headers: {"Content-Type": "application/json"},
+                            body: JSON.stringify(data),
+                            costOnly: true
+                          });
+                        },
+                        fetchResult: (endpoint, data) => {
+                          return aimFetch(endpoint, userAddress, {
+                            method: "POST",
+                            headers: {"Content-Type": "application/json"},
+                            body: JSON.stringify(data),
+                          });
+                        }};
+        });
+        return data;
+      });
+  };
+
   const requestAccounts = () => {
     return MMSDK.getProvider().request({ method: "eth_requestAccounts", params: [] })
       .then(accounts => {
@@ -387,16 +421,6 @@ const HyPCeth = (NODE) => {
         USER_ACCOUNTS = checks;
         return true;
       });
-  };
-
-  const fetchEstimate = (endpoint, data) => {
-    const userAddress = USER_ACCOUNTS[0];
-    return aimFetch(endpoint, userAddress, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(data),
-      costOnly: true
-    });
   };
 
   const fetchBalance = () => {
@@ -413,24 +437,28 @@ const HyPCeth = (NODE) => {
   };
 
   const init = () => {
-    return MMSDK
-      .init()
+    MMSDK = new MetaMaskSDK.MetaMaskSDK({enableDebug: false, dappMetadata: {
+      name: appName,
+      url: window.location.href,
+    }});
+    return MMSDK.init()
       .then(requestAccounts)
       .then(_ => nodeInfo(USER_ACCOUNTS[0]));
   };
 
   return {
     utils: {convertDataURIToBinary: convertDataURIToBinary,
-            ASCIItoHex: ASCIItoHex},
+            ASCIItoHex: ASCIItoHex,
+            toSnakeCase: toSnakeCase},
     internals: {
       contract: HyPCContract,
       nodeFetch: nodeFetch,
       aimFetch: (endpoint, options) => aimFetch(endpoint, USER_ACCOUNTS[0], options),
-      nodeInfo: () => NODE_INFO
+      nodeInfo: NODE_INFO
     },
+    aims: AIMS,
     sendToNode: sendHyPC,
     fetchBalance: fetchBalance,
-    fetchEstimate: fetchEstimate,
     init: init
   };
 };
