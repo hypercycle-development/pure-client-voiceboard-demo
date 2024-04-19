@@ -446,6 +446,8 @@ const HyPCeth = (NODE, appName) => {
       .then(_ => nodeInfo(USER_ACCOUNTS[0]));
   };
 
+  init();
+
   return {
     utils: {convertDataURIToBinary: convertDataURIToBinary,
             ASCIItoHex: ASCIItoHex,
@@ -454,12 +456,12 @@ const HyPCeth = (NODE, appName) => {
       contract: HyPCContract,
       nodeFetch: nodeFetch,
       aimFetch: (endpoint, options) => aimFetch(endpoint, USER_ACCOUNTS[0], options),
-      nodeInfo: NODE_INFO
+      nodeInfo: () => NODE_INFO,
+      init: init,
     },
-    aims: AIMS,
+    aims: () => AIMS,
     sendToNode: sendHyPC,
     fetchBalance: fetchBalance,
-    init: init,
-    version: "0.0.1"
+    version: "0.0.2"
   };
 };
