@@ -464,6 +464,6 @@ const HyPCeth = (NODE, appName) => {
     sendToNode: sendHyPC,
     fetchBalance: fetchBalance,
     init: init,
-    version: "0.0.5"
+    version: "0.0.6"
   };
 };

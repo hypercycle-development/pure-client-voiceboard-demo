@@ -65,8 +65,7 @@ const setup = () => {
   };
 
   const updateBalance = () => {
-    return HyPC.aims().tortoise_tts.fetchResult("speak", {text: txt_text.value, voice: "freeman"})
-      .then(data => setBalance(((data.balance || {}).HyPC) || 0));
+    return HyPC.fetchBalance().then(data => setBalance(data.HyPC || 0));
   };
 
   btn_update_balance.addEventListener("click", ev => {
