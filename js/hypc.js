@@ -409,6 +409,7 @@ const HyPCeth = (NODE, appName) => {
                             body: JSON.stringify(data),
                           });
                         }};
+          return memo;
         }, {});
         return data;
       });
