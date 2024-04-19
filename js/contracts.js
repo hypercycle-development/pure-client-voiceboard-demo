@@ -245,6 +245,5 @@ const CONTRACT_ADDRESSES = {
   },
 };
 const HyPCAddress = CONTRACT_ADDRESSES.testnet.hypc;
-const HyPCtn = "0x640b1274387bf529D016d74161D09c13951867E8";
 const web3 = new Web3(window.ethereum);
 const HyPCContract = new web3.eth.Contract(erc20ABI, HyPCAddress);
