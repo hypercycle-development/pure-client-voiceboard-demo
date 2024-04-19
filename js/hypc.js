@@ -459,11 +459,11 @@ const HyPCeth = (NODE, appName) => {
       nodeFetch: nodeFetch,
       aimFetch: (aimSlot, endpoint, options) => aimFetch(aimSlot, endpoint, USER_ACCOUNTS[0], options),
       nodeInfo: () => NODE_INFO,
-      init: init,
     },
     aims: () => AIMS,
     sendToNode: sendHyPC,
     fetchBalance: fetchBalance,
+    init: init,
     version: "0.0.5"
   };
 };

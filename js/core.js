@@ -1,123 +1,11 @@
+const HyPC = HyPCeth("https://voiceboard.hypercycle.io", "HyPC Serverless Voiceboard");
+
 const byId = id => document.getElementById(id);
 const bySel = selector => document.querySelector(selector);
 
-const NODE = "voiceboard.hypercycle.io";
-const nodeFetch = (endpoint, options) => fetch(`https://${NODE}/${endpoint}`, options).then(res => res.json());
-
-const MMSDK = new MetaMaskSDK.MetaMaskSDK({enableDebug: false, dappMetadata: {
-  name: "Example Pure JS Dapp",
-  url: window.location.href,
-}});
-
-const HyPCDec = 6;
-// HyPCContract.methods.decimals().call().then(dec => )
-
-const updateNodeFromTxn = (userAddress, txId, value) => {
-  const headers = {
-    "tx-sender": userAddress,
-    "tx-origin": userAddress,
-    "hypc-program": "",
-    "currency-type": "HyPC",
-    "tx-driver": "ethereum",
-    "tx-id": txId
-  };
-  return nodeFetch("balance", {method: "POST", headers: headers});
-};
-
-const sendHyPC = (value) => {
-  const nodeAddress = window.NODE_INFO.tm.address;
-  const userAddress = window.USER_ACCOUNTS[0];
-  return HyPCContract.methods.transfer(nodeAddress, value * (10 ** HyPCDec))
-    .send({from: userAddress})
-    .then(tx => { console.log(tx); return tx; })
-    .then(tx => updateNodeFromTxn(userAddress, tx.transactionHash, value));
-};
-
-const nodeInfo = () => {
-  const userAddress = window.USER_ACCOUNTS[0];
-  const headers = {
-    "tx-sender": userAddress,
-    "tx-origin": userAddress,
-    "hypc-program": "",
-    "currency-type": "HyPC",
-    "tx-driver": "ethereum",
-  };
-  return nodeFetch("info", {method: "GET", headers: headers})
-    .then(data => {
-      window.NODE_INFO = data;
-      window.AIM = data.aim.aims.find(aim => aim.image_name == "tortoise-tts");
-      return data;
-    });
-};
-
-const ASCIItoHex = (ascii) => {
-  let hex = '';
-  let tASCII, Hex;
-  ascii.split('').map( i => {
-    tASCII = i.charCodeAt(0);
-    Hex = tASCII.toString(16);
-    hex = hex + Hex + '';
-  });
-  hex = hex.trim();
-  return hex;
-};
-
-const personalSign = (message, address) => {
-  const msg = `0x${ASCIItoHex(message)}`;
-  return window.ethereum.request({method: "personal_sign", params: [msg, address]})
-    .then(data => {
-      console.log("GOT SIGNED MESSAGE:", message, "SIG:", data);
-      return {message: message, signature: data};
-    });
-};
-
-const fetchSignedNonce = (userAddress) => fetch(`https://${NODE}/nonce`, {method: "GET", headers: {sender: userAddress}})
-      .then(res => {
-        console.log("GOT NONCE", res);
-        return res.json();
-      })
-      .then(data => personalSign(data.nonce, userAddress));
-
-const aimFetch = (endpoint, userAddress, options) => {
-  if (options === undefined) {
-    options = {};
-  }
-  const headers = {
-    "tx-sender": userAddress,
-    "tx-origin": userAddress,
-    "hypc-program": "",
-    "currency-type": "HyPC",
-    "tx-driver": "ethereum"
-  };
-  if (options.txValue) {
-    headers["tx-value"] = options.txValue;
-    headers["tx-id"] = options.txId;
-  }
-  if (options.costOnly) {
-    headers.cost_only = "1";
-  }
-  if (options.isPublic) {
-    headers.isPublic = "1";
-  }
-  const hdrs = Object.assign({}, options.headers, headers);
-
-  const url = `https://${NODE}/aim/0/${endpoint}`;
-  const method = options.method || "GET";
-  const opts = (method === "GET" || method === "HEAD")
-        ?  {method: method, headers: hdrs}
-        : {method: method, headers: hdrs, body: options.body};
-
-  console.log("ENDPOINT: ~", endpoint, "~");
-  if (options.isPublic || options.costOnly || endpoint.endsWith("/manifest.json")) {
-    return fetch(url, opts).then(res => res.json());
-  }
-  return fetchSignedNonce(userAddress)
-    .then(data => {
-      hdrs["tx-nonce"] = data.message;
-      hdrs["tx-signature"] = data.signature;
-      return fetch(url, opts);
-    })
-    .then(res => res.json());
+const sorted = (array) => {
+  const res = array.slice().sort();
+  return res;
 };
 
 const debounce = (func, timeout = 300) => {
@@ -128,38 +16,12 @@ const debounce = (func, timeout = 300) => {
   };
 };
 
-const convertDataURIToBinary = (dataURI) => {
-  const BASE64_MARKER = ';base64,';
-  var base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
-  var base64 = dataURI.substring(base64Index);
-  var raw = window.atob(base64);
-  var rawLength = raw.length;
-  var array = new Uint8Array(new ArrayBuffer(rawLength));
-
-  for(i = 0; i < rawLength; i++) {
-    array[i] = raw.charCodeAt(i);
-  }
-  return array;
-};
-
 const textToFilename = (text) => {
   const textPrefix = text.toLowerCase()
 	.replace(/[^a-zA-Z ]/g, "")
 	.split(/\s+/).slice(0, 5).join("-");
   return `voiceboard--${textPrefix}.wav`;
 };
-
-const estimateText = (text) => aimFetch("speak", window.USER_ACCOUNTS[0], {
-  method: "POST",
-  headers: {"Content-Type": "application/json"},
-  body: JSON.stringify({text: text, voice: "freeman"}),
-  costOnly: true});
-
-const readText = (text, voice) => aimFetch("speak", window.USER_ACCOUNTS[0], {
-  method: "POST",
-  headers: {"Content-Type": "application/json"},
-  body: JSON.stringify({text: text, voice: voice})})
-      .then(data => new Audio("data:audio/wav;base64," + data.file));
 
 const voiceToImage = {
   "applejack": "applejack.png",
@@ -174,11 +36,6 @@ const voiceToImage = {
   "rainbow": "rainbow.png",
   "pat": "patrick.png",
   "pat2": "stewart.png"
-};
-
-const sorted = (array) => {
-  const res = array.slice().sort();
-  return res;
 };
 
 const setup = () => {
@@ -197,8 +54,8 @@ const setup = () => {
   const btn_update_balance = byId("update_balance");
 
   const updateEstimate = () => {
-    return estimateText(txt_text.value)
-      .then(data => lbl_estimate.innerHTML = `Estimate: ${data.HyPC.estimated_cost} HyPC`);
+    return HyPC.aims().tortoise_tts.fetchEstimate("speak", {text: txt_text.value, voice: "freeman"})
+      .then(estimate => lbl_estimate.innerHTML = `Estimate: ${estimate.HyPC.estimated_cost} HyPC`);
   };
 
   const setBalance = (balance) => {
@@ -208,21 +65,13 @@ const setup = () => {
   };
 
   const updateBalance = () => {
-    const userAddress = window.USER_ACCOUNTS[0];
-    const headers = {
-      "tx-sender": userAddress,
-      "tx-origin": userAddress,
-      "hypc-program": "",
-      "currency-type": "HyPC",
-      "tx-driver": "ethereum",
-    };
-    return nodeFetch("balance", {method: "GET", headers: headers})
-      .then(data => setBalance(((data.balance[userAddress] || {})['HyPC']) || 0));
+    return HyPC.aims().tortoise_tts.fetchResult("speak", {text: txt_text.value, voice: "freeman"})
+      .then(data => setBalance(((data.balance || {}).HyPC) || 0));
   };
 
   btn_update_balance.addEventListener("click", ev => {
     ev.preventDefault();
-    return sendHyPC(parseInt(inp_tx_val.value))
+    return HyPC.sendToNode(parseInt(inp_tx_val.value))
       .then(res => { console.log("BALANCE UPDATED", res); return res; } )
       .then(res => {
         console.log("Request returned...");
@@ -231,21 +80,10 @@ const setup = () => {
   });
 
   console.log("Getting initial estimate and balance...");
-  MMSDK
-    .init()
-    .then(data => MMSDK.getProvider().request({ method: "eth_requestAccounts", params: [] }))
-    .then(accounts => {
-      const checks = accounts.map(acc => web3.utils.toChecksumAddress(acc));
-      window.USER_ACCOUNTS = checks;
-      return true;
-    })
-    .then(_ => nodeInfo())
+  HyPC.init()
     .then(_ => updateEstimate())
     .then(_ => updateBalance())
-    .then(_ => {
-      console.log("Fetching voices...");
-      return aimFetch("list-voices", window.USER_ACCOUNTS[0]);
-    })
+    .then(_ => HyPC.aims().tortoise_tts.fetchResult("list-voices", undefined, {method: "GET"}))
     .then(data => sorted(data.available_voices).forEach(voice => {
       console.log("Fetched voices:", data);
       const voice_pic = (voice in voiceToImage)
@@ -273,7 +111,8 @@ const setup = () => {
     console.log(`SPEAKING: "${txt_text.value}" - ${voice}`);
     const text = txt_text.value;
 
-    readText(text, voice)
+    HyPC.aims().tortoise_tts.fetchResult("speak", {text: text, voice: voice})
+      .then(data => new Audio("data:audio/wav;base64," + data.file))
       .then(snd => {
 	console.log("SPOKEN", snd);
 	btn_submit.innerHTML = "Speak";
