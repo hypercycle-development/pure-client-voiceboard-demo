@@ -256,9 +256,9 @@ const HyPCeth = (NODE, appName) => {
 
   const nodeFetch = (endpoint, options) => fetch(`${NODE}/${endpoint}`, options).then(res => res.json());
 
-  const MMSDK = null;
-
   const HyPCDec = 6;
+
+  let MMSDK = null;
   let NODE_INFO = {};
   let USER_ACCOUNTS = [];
   let AIMS = {};
