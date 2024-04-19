@@ -409,7 +409,7 @@ const HyPCeth = (NODE, appName) => {
                             body: JSON.stringify(data),
                           });
                         }};
-        });
+        }, {});
         return data;
       });
   };
@@ -462,6 +462,6 @@ const HyPCeth = (NODE, appName) => {
     aims: () => AIMS,
     sendToNode: sendHyPC,
     fetchBalance: fetchBalance,
-    version: "0.0.2"
+    version: "0.0.3"
   };
 };
