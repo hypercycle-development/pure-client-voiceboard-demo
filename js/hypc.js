@@ -257,6 +257,7 @@ const HyPCeth = (NODE, appName) => {
   const nodeFetch = (endpoint, options) => fetch(`${NODE}/${endpoint}`, options).then(res => res.json());
 
   const HyPCDec = 6;
+  // HyPCContract.methods.decimals().call().then(dec => )
 
   let MMSDK = null;
   let NODE_INFO = {};
@@ -313,7 +314,6 @@ const HyPCeth = (NODE, appName) => {
     const userAddress = USER_ACCOUNTS[0];
     return HyPCContract.methods.transfer(nodeAddress, value * (10 ** HyPCDec))
       .send({from: userAddress})
-      .then(tx => { console.log(tx); return tx; })
       .then(tx => updateNodeFromTxn(userAddress, tx.transactionHash, value))
       .then(dat => {
         const bal = dat.balance[userAddress];
@@ -367,7 +367,6 @@ const HyPCeth = (NODE, appName) => {
           ?  {method: method, headers: hdrs}
           : {method: method, headers: hdrs, body: options.body};
 
-    console.log("ENDPOINT: ~", endpoint, "~");
     if (options.isPublic || options.costOnly || endpoint.endsWith("/manifest.json")) {
       return fetch(url, opts).then(res => res.json());
     }
@@ -394,20 +393,24 @@ const HyPCeth = (NODE, appName) => {
         AIMS = data.aim.aims.reduce((memo, aim) => {
           const name = toSnakeCase(aim.image_name);
           memo[name] = {info: aim,
-                        fetchEstimate: (endpoint, data) => {
-                          return aimFetch(aim.slot, endpoint, userAddress, {
-                            method: "POST",
-                            headers: {"Content-Type": "application/json"},
-                            body: JSON.stringify(data),
-                            costOnly: true
-                          });
+                        fetchEstimate: (endpoint, data, options) => {
+                          return aimFetch(
+                            aim.slot, endpoint, userAddress,
+                            Object.assign({}, {
+                              method: "POST",
+                              headers: {"Content-Type": "application/json"},
+                              body: JSON.stringify(data),
+                              costOnly: true
+                            }, options));
                         },
-                        fetchResult: (endpoint, data) => {
-                          return aimFetch(aim.slot, endpoint, userAddress, {
-                            method: "POST",
-                            headers: {"Content-Type": "application/json"},
-                            body: JSON.stringify(data),
-                          });
+                        fetchResult: (endpoint, data, options) => {
+                          return aimFetch(
+                            aim.slot, endpoint, userAddress,
+                            Object.assign({}, {
+                              method: "POST",
+                              headers: {"Content-Type": "application/json"},
+                              body: JSON.stringify(data),
+                            }, options));
                         }};
           return memo;
         }, {});
@@ -447,8 +450,6 @@ const HyPCeth = (NODE, appName) => {
       .then(_ => nodeInfo(USER_ACCOUNTS[0]));
   };
 
-  init();
-
   return {
     utils: {convertDataURIToBinary: convertDataURIToBinary,
             ASCIItoHex: ASCIItoHex,
@@ -463,6 +464,6 @@ const HyPCeth = (NODE, appName) => {
     aims: () => AIMS,
     sendToNode: sendHyPC,
     fetchBalance: fetchBalance,
-    version: "0.0.4"
+    version: "0.0.5"
   };
 };
