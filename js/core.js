@@ -1,4 +1,4 @@
-const HyPC = HyPCeth("https://voiceboard.hypercycle.io", "HyPC Serverless Voiceboard");
+const hypClient = HyPC.eth("https://voiceboard.hypercycle.io", "HyPC Serverless Voiceboard");
 
 const byId = id => document.getElementById(id);
 const bySel = selector => document.querySelector(selector);
@@ -68,7 +68,7 @@ const setup = () => {
   const btn_update_balance = byId("update_balance");
 
   const updateEstimate = () => {
-    return HyPC.aims().tortoise_tts.fetchEstimate("speak", {text: txt_text.value, voice: "freeman"})
+    return hypClient.aims().tortoise_tts.fetchEstimate("speak", {text: txt_text.value, voice: "freeman"})
       .then(estimate => lbl_estimate.innerHTML = `Estimate: ${estimate.HyPC.estimated_cost} HyPC`);
   };
 
@@ -79,19 +79,19 @@ const setup = () => {
   };
 
   const updateBalance = () => {
-    return HyPC.fetchBalance().then(data => setBalance(data.HyPC || 0));
+    return hypClient.fetchBalance().then(data => setBalance(data.HyPC || 0));
   };
 
   btn_update_balance.addEventListener("click", ev => {
     ev.preventDefault();
-    return HyPC.sendToNode(parseInt(inp_tx_val.value)).then(updateBalance);
+    return hypClient.sendToNode(parseInt(inp_tx_val.value)).then(updateBalance);
   });
 
   console.log("Getting initial estimate and balance...");
-  HyPC.init()
+  hypClient.init()
     .then(_ => updateEstimate())
     .then(_ => updateBalance())
-    .then(_ => HyPC.aims().tortoise_tts.fetchResult("list-voices", undefined, {method: "GET"}))
+    .then(_ => hypClient.aims().tortoise_tts.fetchResult("list-voices", undefined, {method: "GET"}))
     .then(data => sorted(data.available_voices).forEach(voice => {
       const voice_pic = (voice in voiceToImage)
 	    ? `<img class="voice-pic" src="img/${voiceToImage[voice]}" /> ${voice}`
@@ -118,7 +118,7 @@ const setup = () => {
     console.log(`SPEAKING: "${txt_text.value}" - ${voice}`);
     const text = txt_text.value;
 
-    HyPC.aims().tortoise_tts.fetchResult("speak", {text: text, voice: voice})
+    hypClient.aims().tortoise_tts.fetchResult("speak", {text: text, voice: voice})
       .then(data => new Audio("data:audio/wav;base64," + data.file))
       .then(snd => {
 	console.log("SPOKEN", snd);

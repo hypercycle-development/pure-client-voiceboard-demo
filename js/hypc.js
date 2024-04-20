@@ -1,4 +1,4 @@
-const HyPCeth = (NODE, appName) => {
+const HyPC = {eth: (NODE, appName) => {
   if (appName === undefined) {
     appName = "HyPC Serverless App";
   }
@@ -449,6 +449,6 @@ const HyPCeth = (NODE, appName) => {
     sendToNode: sendHyPC,
     fetchBalance: fetchBalance,
     init: init,
-    version: "0.0.7"
+    version: "0.0.8"
   };
-};
+}};
