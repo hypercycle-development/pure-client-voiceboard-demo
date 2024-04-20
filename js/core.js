@@ -84,11 +84,7 @@ const setup = () => {
 
   btn_update_balance.addEventListener("click", ev => {
     ev.preventDefault();
-    return HyPC.sendToNode(parseInt(inp_tx_val.value))
-      .then(res => {
-        console.log("Request returned...");
-        updateBalance();
-      });
+    return HyPC.sendToNode(parseInt(inp_tx_val.value)).then(updateBalance);
   });
 
   console.log("Getting initial estimate and balance...");
@@ -97,7 +93,6 @@ const setup = () => {
     .then(_ => updateBalance())
     .then(_ => HyPC.aims().tortoise_tts.fetchResult("list-voices", undefined, {method: "GET"}))
     .then(data => sorted(data.available_voices).forEach(voice => {
-      console.log("Fetched voices:", data);
       const voice_pic = (voice in voiceToImage)
 	    ? `<img class="voice-pic" src="img/${voiceToImage[voice]}" /> ${voice}`
 	    : `<img class="voice-pic" src="img/default.jpg" /> ${voice}`;
@@ -146,7 +141,6 @@ const setup = () => {
 };
 
 window.addEventListener("DOMContentLoaded", () => {
-  console.log("HELLO FROM THE LOADED EVENT!");
-  console.log("Got health response, setting up...");
+  console.log("Setting up voiceboard...");
   setup();
 });
