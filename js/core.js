@@ -105,7 +105,7 @@ const setup = () => {
       rad_div.classList.add("mx-2");
       rad_div.innerHTML = `
 	    <input type="radio" name="voice_radio" id="voice_radio_${voice}" value="${voice}" ${(voice == "freeman") ? "checked" : ""} />
-	    <label class="form-check-label" for="voice_radio_${voice}">
+	    <label class="form-check-label transition-transform duration-300 ease-in-out transform hover:scale-110" for="voice_radio_${voice}">
 	      ${voice_pic}
 	    </label>`;
       voice_radios.appendChild(rad_div);
