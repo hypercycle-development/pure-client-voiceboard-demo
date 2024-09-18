@@ -1,66 +1,144 @@
 <html>
-  <head>
-    <title>Voiceboard Demo</title>
-    <script src="https://hypercycle-development.github.io/hypc-js/metamask-sdk.js"></script>
-    <script src="https://hypercycle-development.github.io/hypc-js/web3.min.js"></script>
-    <script src="https://hypercycle-development.github.io/hypc-js/hypc.js"></script>
-    <script src="js/core.js"></script>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
-      crossorigin="anonymous" />
-    <link href="core.css" rel="stylesheet" />
-  </head>
-  <body>
-    <div class="container text-center">
-      <div class="row m-5">
-	<h3 id="title">Voiceboard</h3>
-      </div>
-      <div class="row mb-3">
-	<audio id="audio" class="ratio ratio-16x9" controls>
-	  <source src="voiceboard--you-are-now-hearing-this.wav">
-	</audio>
-	<a id="save_audio" href="voiceboard--you-are-now-hearing-this.wav">Save Audio</a>
-      </div>
-      <form>
-	<div class="row mb-3 col-12">
-	  <textarea id="text" class="form-control">You are now hearing this in my voice</textarea>
+
+<head>
+	<title>Voiceboard Demo</title>
+	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+	<script src="https://hypercycle-development.github.io/hypc-js/metamask-sdk.js"></script>
+	<script src="https://hypercycle-development.github.io/hypc-js/web3.min.js"></script>
+	<script src="https://hypercycle-development.github.io/hypc-js/hypc.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/wavesurfer.js"></script>
+	<script src="js/core.js"></script>
+	<link rel="icon" type="image/x-icon" href="favicon.ico">
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link href="core.css" rel="stylesheet" />
+</head>
+
+<body>
+	<div class="container mx-auto text-center">
+		<div class="flex flex-wrap mx-4 mt-5 mb-20">
+			<h2 id="title">Voiceboard</h2>
+		</div>
+
+		<div class="mx-4 mb-12">
+			<div class="flex mx-8 mb-3">
+				<div class="w-full" id="waveform"></div>
+			</div>
+			<div class="flex justify-between mb-3">
+				<div></div>
+				<button
+					class="rounded-full  ml-7 w-14 h-14 grid place-items-center bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out"
+					title="Play/Pause" id="playPause">
+					<svg class="text-gray-100" fill="currentColor" id="playIcon" xmlns="http://www.w3.org/2000/svg"
+						width="24" height="24" viewBox="0 0 24 24">
+						<path d="M8 5v14l11-7z" />
+					</svg>
+					<svg class="text-gray-100" fill="currentColor" id="pauseIcon" xmlns="http://www.w3.org/2000/svg"
+						width="24" height="24" viewBox="0 0 24 24" style="display:none;">
+						<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+					</svg>
+				</button>
+				<a class="self-end" target="_blank" id="save_audio" href="voiceboard--you-are-now-hearing-this.wav">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+						stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+						<polyline points="7 10 12 15 17 10"></polyline>
+						<line x1="12" y1="15" x2="12" y2="3"></line>
+					</svg>
+				</a>
+			</div>
+		</div>
+		<form>
+			<div class="flex flex-wrap mb-3 w-full">
+				<textarea id="text"
+					class="w-full p-4 border border-gray-300 rounded">You are now hearing this in my voice</textarea>
+			</div>
+			<div class="flex mb-8">
+				<div class="grid gap-2 w-full">
+					<button id="submit"
+						class="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out">
+						Speak
+					</button>
+				</div>
+			</div>
+			<div class="grid grid-cols-2 gap-4 w-full mb-8">
+				<div class="flex flex-col mb-3 w-full">
+					<div class="grid gap-2 w-full text-lg text-left" id="speak_estimate">
+						Estimate:
+					</div>
+					<div class="grid gap-2 w-full text-lg text-left" id="wallet_balance">
+						Balance:
+					</div>
+				</div>
+				<div class="grid grid-cols-2 gap-2 mb-3 w-full">
+					<div class="grid gap-2">
+						<input class="h-full p-3 border border-gray-300 rounded w-full" type="number"
+							id="transaction_value" placeholder="HyPC amount" />
+					</div>
+					<div class="grid gap-2">
+						<button id="update_balance"
+							class="h-full p-3 px-6 py-2.5 bg-blue-600 text-white font-medium leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out">
+							Send HyPC
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="flex flex-wrap mb-3 w-full justify-center" id="voice_radio_list">
+			</div>
+		</form>
 	</div>
-	<div class="row mb-3 col-12">
-	  <div class="d-grid gap-2 col-6" id="speak_estimate">
-	    Estimate:
-	  </div>
-	  <div class="d-grid gap-2 col-6" id="wallet_balance">
-	    Balance:
-	  </div>
-	</div>
-	<div class="row mb-3 col-12">
-	  <div class="d-grid gap-2 col-6">
-	  </div>
-	  <div class="d-grid gap-2 col-3">
-	    <input id="transaction_value" placeholder="HyPC amount" />
-	  </div>
-	  <div class="d-grid gap-2 col-3">
-	    <button id="update_balance" class="btn btn-secondary">
-	      Send HyPC
-	    </button>
-	  </div>
-	</div>
-	<div class="row mb-3 col-12" id="voice_radio_list">
-	</div>
-	<div class="row mb-3">
-	  <div class="d-grid gap-2 col-6">
-	    <!-- <select id="voices" class="form-select"></select> -->
-	  </div>
-	  <div class="d-grid gap-2 col-6">
-	    <button id="submit" class="btn btn-primary">
-	      Speak
-	    </button>
-	  </div>
-	</div>
-      </form>
-    </div>
-  </body>
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			const playPauseButton = document.getElementById('playPause');
+			const playIcon = document.getElementById('playIcon');
+			const pauseIcon = document.getElementById('pauseIcon');
+
+			// Inicializa WaveSurfer
+			const wavesurfer = WaveSurfer.create({
+				container: '#waveform',
+				waveColor: 'violet',
+				progressColor: 'purple',
+				height: 150,
+				barWidth: 4, // Ajusta el ancho de las barras
+				barRadius: 4, // Radio de las esquinas redondeadas
+			});
+
+			// Carga el archivo de audio
+			wavesurfer.load('voiceboard--you-are-now-hearing-this.wav');
+
+			// Opcional: Agregar eventos
+			wavesurfer.on('ready', () => {
+				console.log('Audio is ready');
+			});
+
+			// Cambia el ícono al hacer clic
+			playPauseButton.addEventListener('click', () => {
+				if (wavesurfer.isPlaying()) {
+					wavesurfer.pause();
+					togglePlayPauseIcons(false);  // Muestra el ícono de Play
+				} else {
+					wavesurfer.play();
+					togglePlayPauseIcons(true);   // Muestra el ícono de Pausa
+				}
+			});
+
+
+			// Cuando el audio termina, vuelve a mostrar el ícono de Play
+			wavesurfer.on('finish', () => {
+				togglePlayPauseIcons(false);  // Muestra el ícono de Play cuando termina
+			});
+
+			// Función para alternar los íconos
+			function togglePlayPauseIcons(isPlaying) {
+				if (isPlaying) {
+					playIcon.style.display = 'none';
+					pauseIcon.style.display = 'block';
+				} else {
+					playIcon.style.display = 'block';
+					pauseIcon.style.display = 'none';
+				}
+			}
+		});
+	</script>
+</body>
+
 </html>

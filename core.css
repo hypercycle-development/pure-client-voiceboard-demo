@@ -1,15 +1,51 @@
+:root {
+  --green: #5db603;
+  --blue: #007bff;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f6f6f6;
+  color: #333;
+  font-family: "Poppins", sans-serif;
+}
+
+#title {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
 .form-check {
-    line-break: anywhere;
-    word-break: break-all;
-    width: 86px;
+  line-break: anywhere;
+  word-break: break-all;
+  width: 86px;
 }
 
 .form-check input[type="radio"] {
-    display: none;
+  display: none;
 }
 
-.voice-pic { width: 80px; }
+.voice-pic {
+  width: 80px;
+  border-radius: 50%;
+}
 
 input[type="radio"]:checked + label {
-    border: 3px solid green;
+  color: var(--blue);
+  font-weight: 500;
+}
+
+input[type="radio"]:checked + label > img {
+  border: 2px solid var(--blue);
+}
+
+#voice_radio_list label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-transform: capitalize;
+  cursor: pointer;
 }

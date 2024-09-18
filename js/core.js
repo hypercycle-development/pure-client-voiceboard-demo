@@ -98,7 +98,7 @@ const setup = () => {
 	    : `<img class="voice-pic" src="img/default.jpg" /> ${voice}`;
       const rad_div = document.createElement("div");
       rad_div.classList.add("form-check");
-      rad_div.classList.add("col-sm-1");
+      rad_div.classList.add("mx-2");
       rad_div.innerHTML = `
 	    <input type="radio" name="voice_radio" id="voice_radio_${voice}" value="${voice}" ${(voice == "freeman") ? "checked" : ""} />
 	    <label class="form-check-label" for="voice_radio_${voice}">
