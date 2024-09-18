@@ -69,11 +69,11 @@ const setup = () => {
 
   const updateEstimate = () => {
     return hypClient.aims().tortoise_tts.fetchEstimate("speak", { text: txt_text.value, voice: "freeman" })
-      .then(estimate => lbl_estimate.innerHTML = `Estimate: ${estimate.HyPC.estimated_cost} USD`);
+      .then(estimate => lbl_estimate.innerHTML = `Estimate: ${estimate.HyPC.estimated_cost.toLocaleString('en-US')} USD`);
   };
 
   const setBalance = (balance) => {
-    const balance_str = `Balance: ${balance} USD`;
+    const balance_str = `Balance: ${balance.toLocaleString('en-US')} USD`;
     lbl_balance.innerHTML = balance_str;
     return balance;
   };
