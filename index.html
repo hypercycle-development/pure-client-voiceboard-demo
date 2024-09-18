@@ -21,6 +21,9 @@
 
 		<div class="mx-4 mb-12">
 			<div class="flex mx-8 mb-3">
+				<audio id="audio" class="hidden" controls>
+					<source src="voiceboard--you-are-now-hearing-this.wav">
+				</audio>
 				<div class="w-full" id="waveform"></div>
 			</div>
 			<div class="flex justify-between mb-3">
@@ -92,23 +95,27 @@
 			const playIcon = document.getElementById('playIcon');
 			const pauseIcon = document.getElementById('pauseIcon');
 
-			// Inicializa WaveSurfer
 			const wavesurfer = WaveSurfer.create({
 				container: '#waveform',
 				waveColor: 'violet',
 				progressColor: 'purple',
 				height: 150,
-				barWidth: 4, // Ajusta el ancho de las barras
-				barRadius: 4, // Radio de las esquinas redondeadas
+				barWidth: 4,
+				barRadius: 4,
 			});
 
-			// Carga el archivo de audio
+			const audioElement = document.querySelector('#audio');
+			const audioSourceElement = document.querySelector('#audio source');
+
+			async function loadWaveform() {
+				await wavesurfer.load(audioSourceElement.src); // Usa el src del elemento <audio>
+
+				wavesurfer.play();
+				togglePlayPauseIcons(true);   // Muestra el ícono de Pausa
+			}
+
+			// Carga inicial
 			wavesurfer.load('voiceboard--you-are-now-hearing-this.wav');
-
-			// Opcional: Agregar eventos
-			wavesurfer.on('ready', () => {
-				console.log('Audio is ready');
-			});
 
 			// Cambia el ícono al hacer clic
 			playPauseButton.addEventListener('click', () => {
@@ -116,8 +123,8 @@
 					wavesurfer.pause();
 					togglePlayPauseIcons(false);  // Muestra el ícono de Play
 				} else {
-					wavesurfer.play();
-					togglePlayPauseIcons(true);   // Muestra el ícono de Pausa
+					loadWaveform();
+					console.log('Playing');
 				}
 			});
 

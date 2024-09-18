@@ -24,7 +24,7 @@ const convertDataURIToBinary = (dataURI) => {
   var rawLength = raw.length;
   var array = new Uint8Array(new ArrayBuffer(rawLength));
 
-  for(i = 0; i < rawLength; i++) {
+  for (i = 0; i < rawLength; i++) {
     array[i] = raw.charCodeAt(i);
   }
   return array;
@@ -32,8 +32,8 @@ const convertDataURIToBinary = (dataURI) => {
 
 const textToFilename = (text) => {
   const textPrefix = text.toLowerCase()
-	.replace(/[^a-zA-Z ]/g, "")
-	.split(/\s+/).slice(0, 5).join("-");
+    .replace(/[^a-zA-Z ]/g, "")
+    .split(/\s+/).slice(0, 5).join("-");
   return `voiceboard--${textPrefix}.wav`;
 };
 
@@ -68,7 +68,7 @@ const setup = () => {
   const btn_update_balance = byId("update_balance");
 
   const updateEstimate = () => {
-    return hypClient.aims().tortoise_tts.fetchEstimate("speak", {text: txt_text.value, voice: "freeman"})
+    return hypClient.aims().tortoise_tts.fetchEstimate("speak", { text: txt_text.value, voice: "freeman" })
       .then(estimate => lbl_estimate.innerHTML = `Estimate: ${estimate.HyPC.estimated_cost} HyPC`);
   };
 
@@ -91,11 +91,11 @@ const setup = () => {
   hypClient.init()
     .then(_ => updateEstimate())
     .then(_ => updateBalance())
-    .then(_ => hypClient.aims().tortoise_tts.fetchResult("list-voices", undefined, {method: "GET"}))
+    .then(_ => hypClient.aims().tortoise_tts.fetchResult("list-voices", undefined, { method: "GET" }))
     .then(data => sorted(data.available_voices).forEach(voice => {
       const voice_pic = (voice in voiceToImage)
-	    ? `<img class="voice-pic" src="img/${voiceToImage[voice]}" /> ${voice}`
-	    : `<img class="voice-pic" src="img/default.jpg" /> ${voice}`;
+        ? `<img class="voice-pic" src="img/${voiceToImage[voice]}" /> ${voice}`
+        : `<img class="voice-pic" src="img/default.jpg" /> ${voice}`;
       const rad_div = document.createElement("div");
       rad_div.classList.add("form-check");
       rad_div.classList.add("mx-2");
@@ -118,24 +118,25 @@ const setup = () => {
     console.log(`SPEAKING: "${txt_text.value}" - ${voice}`);
     const text = txt_text.value;
 
-    hypClient.aims().tortoise_tts.fetchResult("speak", {text: text, voice: voice})
+    hypClient.aims().tortoise_tts.fetchResult("speak", { text: text, voice: voice })
       .then(data => new Audio("data:audio/wav;base64," + data.file))
       .then(snd => {
-	console.log("SPOKEN", snd);
-	btn_submit.innerHTML = "Speak";
-	btn_submit.removeAttribute("disabled");
-	const bin = convertDataURIToBinary(snd.src);
-	const fl = new File([bin], textToFilename(text));
-	save_as_link.href = URL.createObjectURL(fl);
-	audio_src.src = snd.src;
-	audio.load();
-	audio.play();
+        console.log("SPOKEN", snd);
+        btn_submit.innerHTML = "Speak";
+        btn_submit.removeAttribute("disabled");
+        const bin = convertDataURIToBinary(snd.src);
+        const fl = new File([bin], textToFilename(text));
+        save_as_link.href = URL.createObjectURL(fl);
+        audio_src.src = snd.src;
+        audio.load();
+        // audio.play();
+        document.getElementById('playPause').click()
         return updateBalance();
       })
       .catch(err => {
         console.log("FAILED", err);
         btn_submit.innerHTML = "Speak";
-	btn_submit.removeAttribute("disabled");
+        btn_submit.removeAttribute("disabled");
       });
   });
 };
