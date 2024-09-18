@@ -107,11 +107,35 @@
 			const audioElement = document.querySelector('#audio');
 			const audioSourceElement = document.querySelector('#audio source');
 
+			async function updateDownloadLink() {
+				const downloadLink = document.getElementById('save_audio');
+				const audioSource = document.querySelector('#audio source');
+
+				try {
+					// Obtener el ArrayBuffer del archivo de audio
+					const response = await fetch(audioSource.src);
+					const arrayBuffer = await response.arrayBuffer();
+
+					// Crear un Blob con el ArrayBuffer
+					const blob = new Blob([arrayBuffer], { type: 'audio/wav' });
+
+					// Crear una URL para el Blob
+					const url = URL.createObjectURL(blob);
+
+					// Actualizar el enlace de descarga
+					downloadLink.href = url;
+					downloadLink.download = 'audio.wav';
+				} catch (error) {
+					console.error('Error al obtener el audioBuffer:', error);
+				}
+			}
+
 			async function loadWaveform() {
 				await wavesurfer.load(audioSourceElement.src); // Usa el src del elemento <audio>
 
 				wavesurfer.play();
 				togglePlayPauseIcons(true);   // Muestra el ícono de Pausa
+				updateDownloadLink();
 			}
 
 			// Carga inicial
