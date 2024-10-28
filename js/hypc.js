@@ -247,6 +247,7 @@ const HyPC = {eth: (NODE, appName) => {
       swapV2: "0x5c3077CC8108b7C4C59A50829c4Aeba9a523e533",
       fundPoolV1: "0xdbF42E4CD2683D796930e7eb0AEA9d7b40aA13D6",
       shareTokens: "0xD0bD9E3a8835197b6804641cbafb9E379a622646",
+      usdc: "0xf08A50178dfcDe18524640EA6618a1f965821715",
     },
     mainnet: {
       licenses: "0xd32cb5f76989a27782e44c5297aaba728ad61669",
@@ -257,6 +258,7 @@ const HyPC = {eth: (NODE, appName) => {
       swapV2: "0x21468e63abF3783020750F7b2e57d4B34aFAfba6",
       shareTokens: "0x4BFbA79CF232361a53eDdd17C67C6c77A6F00379",
       fundPoolV1: "",
+      usdc: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
     },
   };
   const HyPCAddress = CONTRACT_ADDRESSES.testnet.hypc;
