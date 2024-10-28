@@ -261,15 +261,13 @@ const HyPC = {eth: (NODE, appName) => {
       usdc: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
     },
   };
-  const HyPCAddress = CONTRACT_ADDRESSES.testnet.hypc;
-
   const web3 = new Web3(window.ethereum);
-  const HyPCContract = new web3.eth.Contract(erc20ABI, HyPCAddress);
+  const Contract = new web3.eth.Contract(erc20ABI, CONTRACT_ADDRESSES.testnet.usdc);
 
   const nodeFetch = (endpoint, options) => fetch(`${NODE}/${endpoint}`, options).then(res => res.json());
 
   const HyPCDec = 6;
-  // HyPCContract.methods.decimals().call().then(dec => )
+  // Contract.methods.decimals().call().then(dec => )
 
   let MMSDK = null;
   let NODE_INFO = {};
@@ -310,7 +308,7 @@ const HyPC = {eth: (NODE, appName) => {
   const sendHyPC = (value) => {
     const nodeAddress = NODE_INFO.tm.address;
     const userAddress = USER_ACCOUNTS[0];
-    return HyPCContract.methods.transfer(nodeAddress, value * (10 ** HyPCDec))
+    return Contract.methods.transfer(nodeAddress, value * (10 ** HyPCDec))
       .send({from: userAddress})
       .then(tx => updateNodeFromTxn(userAddress, tx.transactionHash, value))
       .then(dat => {
@@ -456,7 +454,7 @@ const HyPC = {eth: (NODE, appName) => {
             toSnakeCase: toSnakeCase,
             insertDecimal: insertDecimal},
     internals: {
-      contract: HyPCContract,
+      contract: Contract,
       nodeFetch: nodeFetch,
       aimFetch: (aimSlot, endpoint, options) => aimFetch(aimSlot, endpoint, USER_ACCOUNTS[0], options),
       nodeInfo: () => NODE_INFO,
