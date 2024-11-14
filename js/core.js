@@ -1,4 +1,4 @@
-const hypClient = HyPC.eth("https://voiceboard.hypercycle.io", "HyPC Serverless Voiceboard");
+const hypClient = HyPC.eth("http://44.197.199.9:8000", "HyPC Serverless Voiceboard");
 
 const byId = id => document.getElementById(id);
 const bySel = selector => document.querySelector(selector);
