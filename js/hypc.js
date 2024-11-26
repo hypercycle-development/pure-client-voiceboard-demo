@@ -262,7 +262,7 @@ const HyPC = {eth: (NODE, appName) => {
     },
   };
   const web3 = new Web3(window.ethereum);
-  const Contract = new web3.eth.Contract(erc20ABI, CONTRACT_ADDRESSES.testnet.usdc);
+  const Contract = new web3.eth.Contract(erc20ABI, CONTRACT_ADDRESSES.mainnet.usdc);
 
   const nodeFetch = (endpoint, options) => fetch(`${NODE}/${endpoint}`, options).then(res => res.json());
 
@@ -298,7 +298,7 @@ const HyPC = {eth: (NODE, appName) => {
       "tx-sender": userAddress,
       "tx-origin": userAddress,
       "hypc-program": "",
-      "currency-type": "HyPC",
+      "currency-type": "USDC",
       "tx-driver": "ethereum",
       "tx-id": txId
     };
@@ -342,7 +342,7 @@ const HyPC = {eth: (NODE, appName) => {
       "tx-sender": userAddress,
       "tx-origin": userAddress,
       "hypc-program": "",
-      "currency-type": "HyPC",
+      "currency-type": "USDC",
       "tx-driver": "ethereum"
     };
     if (options.txValue) {
@@ -382,7 +382,7 @@ const HyPC = {eth: (NODE, appName) => {
       "tx-sender": userAddress,
       "tx-origin": userAddress,
       "hypc-program": "",
-      "currency-type": "HyPC",
+      "currency-type": "USDC",
       "tx-driver": "ethereum",
     };
     return nodeFetch("info", {method: "GET", headers: headers})
@@ -432,7 +432,7 @@ const HyPC = {eth: (NODE, appName) => {
       "tx-sender": userAddress,
       "tx-origin": userAddress,
       "hypc-program": "",
-      "currency-type": "HyPC",
+      "currency-type": "USDC",
       "tx-driver": "ethereum",
     };
     return nodeFetch("balance", {method: "GET", headers: headers})
