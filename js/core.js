@@ -69,7 +69,7 @@ const setup = () => {
 
   const updateEstimate = () => {
     return hypClient.aims().tortoise_tts.fetchEstimate("speak", { text: txt_text.value, voice: "freeman" })
-      .then(estimate => lbl_estimate.innerHTML = `Estimate: ${(estimate.USDC.estimated_cost / 1e6).toLocaleString('en-US', {
+      .then(estimate => lbl_estimate.innerHTML = `Estimate: ${(estimate.HyPC.estimated_cost / 1e6).toLocaleString('en-US', {
         minimumFractionDigits: 6,
       })} USD`);
   };
@@ -147,5 +147,6 @@ const setup = () => {
 
 window.addEventListener("DOMContentLoaded", () => {
   console.log("Setting up voiceboard...");
+  console.log("new version");
   setup();
 });

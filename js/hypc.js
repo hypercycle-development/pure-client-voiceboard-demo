@@ -422,6 +422,7 @@ const HyPC = {eth: (NODE, appName) => {
       .then(accounts => {
         const checks = accounts.map(acc => web3.utils.toChecksumAddress(acc));
         USER_ACCOUNTS = checks;
+        console.log(USER_ACCOUNTS);
         return true;
       });
   };
