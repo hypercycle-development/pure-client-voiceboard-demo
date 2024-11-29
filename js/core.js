@@ -83,10 +83,7 @@ const setup = () => {
   };
 
   const updateBalance = () => {
-    return hypClient.fetchBalance().then(data => {
-      console.log("balance: ", data); // Log the entire data object
-      return data.balance[userAddress] || {};
-    });
+    return hypClient.fetchBalance().then(data => setBalance(data.USDC || 0));
   };
 
   btn_update_balance.addEventListener("click", ev => {
