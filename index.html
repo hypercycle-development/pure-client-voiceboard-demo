@@ -14,12 +14,15 @@
   </head>
 
   <body>
+	<div class="fixed top-0 left-0 w-full bg-orange-200 text-orange-800 p-4 text-center z-50">
+		<p>Welcome to the Voiceboard Demo. This is an experimental prototype. Due to high usage, functionality may be limited and performance may vary. Please do not reload the page while depositing USDC. If you encounter other errors, refresh the page and try again.</p>
+	  </div>
     <div class="container mx-auto text-center">
       <div class="flex flex-wrap mx-4 mt-5 mb-20">
 	<h2 id="title">Voiceboard</h2>
       </div>
 
-      <div class="mx-4 mb-12">
+      <s= class="mx-4 mb-12"></div>
 	<div class="flex mx-8 mb-3">
 	  <audio id="audio" class="hidden" controls>
 	    <source src="voiceboard--you-are-now-hearing-this.wav">
@@ -51,10 +54,14 @@
 	</div>
       </div>
       <form>
-	<div class="flex flex-wrap mb-3 w-full">
-	  <textarea id="text"
-		    class="w-full p-4 border border-gray-300 rounded">You are now hearing this in my voice</textarea>
-	</div>
+		<div class="flex flex-wrap mb-3 w-full">
+			<textarea id="text"
+				  class="w-full p-4 border border-gray-300 rounded"
+				  maxlength="300"
+				  oninput="updateCharacterCount()"
+			>You are now hearing this in my voice</textarea>
+			<div class="text-sm text-gray-500" id="charCount">0/300</div>
+		  </div>
 	<div class="flex mb-8">
 	  <div class="grid gap-2 w-full">
 	    <button id="submit"
@@ -90,10 +97,19 @@
       </form>
     </div>
     <script>
-      document.addEventListener('DOMContentLoaded', () => {
-	const playPauseButton = document.getElementById('playPause');
-	const playIcon = document.getElementById('playIcon');
-	const pauseIcon = document.getElementById('pauseIcon');
+
+	function updateCharacterCount() {
+    	const textArea = document.getElementById('text');
+    	const charCount = document.getElementById('charCount');
+    	const currentLength = textArea.value.length;
+    	charCount.textContent = `${currentLength}/300`;
+  	}
+    document.addEventListener('DOMContentLoaded', () => {
+		const playPauseButton = document.getElementById('playPause');
+		const playIcon = document.getElementById('playIcon');
+		const pauseIcon = document.getElementById('pauseIcon');
+
+		updateCharacterCount();
 
 	const wavesurfer = WaveSurfer.create({
 	  container: '#waveform',
