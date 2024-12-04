@@ -59,9 +59,9 @@
 		</div>
 		<form>
 			<div class="flex flex-wrap mb-3 w-full">
-				<textarea id="text" class="w-full p-4 border border-gray-300 rounded" maxlength="300"
+				<textarea id="text" class="w-full p-4 border border-gray-300 rounded" maxlength="100"
 					oninput="updateCharacterCount()">You are now hearing this in my voice</textarea>
-				<div class="text-sm text-gray-500" id="charCount">0/300</div>
+				<div class="text-sm text-gray-500" id="charCount">0/100</div>
 			</div>
 			<div class="flex mb-8">
 				<div class="grid gap-2 w-full">
@@ -103,7 +103,7 @@
 			const textArea = document.getElementById('text');
 			const charCount = document.getElementById('charCount');
 			const currentLength = textArea.value.length;
-			charCount.textContent = `${currentLength}/300`;
+			charCount.textContent = `${currentLength}/100`;
 		}
 		document.addEventListener('DOMContentLoaded', () => {
 			const playPauseButton = document.getElementById('playPause');
