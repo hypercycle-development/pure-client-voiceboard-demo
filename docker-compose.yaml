@@ -2,7 +2,10 @@ version: '3.8'
 
 services:
   web:
-    build: .
+    build:
+      context: .
+    image: voiceboard-client
     ports:
       - "80:80"
     container_name: voiceboard-client
+    restart: always
