@@ -1,6 +1,6 @@
 const HyPC = {eth: (NODE, appName) => {
   if (appName === undefined) {
-    appName = "HyPC Serverless App";
+    appName = "USDC Serverless App";
   }
 
   const insertDecimal = (integer, decimal) => {
