@@ -261,6 +261,11 @@ const HyPC = {eth: (NODE, appName) => {
       usdc: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
     },
   };
+
+// ethers
+const provider = new ethers.BrowserProvider(window.ethereum);
+
+  //web3
   const web3 = new Web3(window.ethereum);
   const Contract = new web3.eth.Contract(erc20ABI, CONTRACT_ADDRESSES.mainnet.usdc);
 
@@ -305,19 +310,28 @@ const HyPC = {eth: (NODE, appName) => {
     return nodeFetch("balance", {method: "POST", headers: headers});
   };
 
-  const sendHyPC = (value) => {
+  const sendHyPC = async (value) => {
+    console.log("Sending");
     const nodeAddress = NODE_INFO.tm.address;
     const userAddress = USER_ACCOUNTS[0];
-    return Contract.methods.transfer(nodeAddress, value * (10 ** HyPCDec))
-      .send({from: userAddress})
-      .then(tx => updateNodeFromTxn(userAddress, tx.transactionHash, value))
-      .then(dat => {
-        const bal = dat.balance[userAddress];
-        if (dat.verified === "true") {
-          return {balance: bal, status: "ok"};
-        }
-        return {balance: bal, status: "error", error: dat.verification_message};
-      });
+    const signer = await provider.getSigner();
+    const ethersContract = new ethers.Contract(CONTRACT_ADDRESSES.mainnet.usdc, erc20ABI, signer);
+
+    try {
+      // Send USDC
+      const tx = await ethersContract.transfer(nodeAddress, value * (10 ** HyPCDec));
+      console.log('Transaction hash:', tx.hash);
+      
+      const dat = await updateNodeFromTxn(userAddress, tx.hash, value);
+      const bal = dat.balance[userAddress];
+
+      await provider.waitForTransaction(tx.hash);
+      return { balance: bal, status: "ok" };
+      
+    } catch (error) {
+      console.error("Transaction failed:", error);
+      return { status: "error", error: error.message };
+    }
   };
 
   const personalSign = (message, address) => {

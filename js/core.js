@@ -1,4 +1,4 @@
-const hypClient = HyPC.eth("http://52.26.219.108:8000", "USDC Serverless Voiceboard");
+const hypClient = HyPC.eth("http://52.88.200.3:8000", "USDC Serverless Voiceboard");
 
 const byId = id => document.getElementById(id);
 const bySel = selector => document.querySelector(selector);
@@ -88,7 +88,7 @@ const setup = () => {
 
   btn_update_balance.addEventListener("click", ev => {
     ev.preventDefault();
-    return hypClient.sendToNode(parseInt(inp_tx_val.value)).then(updateBalance);
+    return hypClient.sendToNode(parseFloat(inp_tx_val.value)).then(updateBalance);
   });
 
   console.log("Getting initial estimate and balance...");
@@ -143,6 +143,8 @@ const setup = () => {
         btn_submit.removeAttribute("disabled");
       });
   });
+    // Call updateBalance every 15 seconds
+    setInterval(updateBalance, 15000);
 };
 
 window.addEventListener("DOMContentLoaded", () => {
