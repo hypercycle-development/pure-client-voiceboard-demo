@@ -67,11 +67,20 @@ const setup = () => {
   const inp_tx_val = byId("transaction_value");
   const btn_update_balance = byId("update_balance");
 
-  const updateEstimate = () => {
-    return hypClient.aims().tortoise_tts.fetchEstimate("speak", { text: txt_text.value, voice: "freeman" })
-      .then(estimate => lbl_estimate.innerHTML = `Estimate: ${(estimate.HyPC.estimated_cost / 1e6).toLocaleString('en-US', {
+  const updateEstimate = async () => {
+    try {
+      const estimate = await hypClient.aims().tortoise_tts.fetchEstimate("speak", { text: txt_text.value, voice: "freeman" });
+      const estimated_cost = estimate.HyPC.estimated_cost;
+      const response = await hypClient.nodeFetch("exchange_rates", {method : "GET"});
+      //TODO: cache the response either here or in the backend.
+      const usdcRate = response.find(rate => rate._id === "USDC-HyPC").rate;
+      const estimatedCostInUSDC = estimated_cost / usdcRate;
+      lbl_estimate.innerHTML = `Estimate: ${(estimatedCostInUSDC / 1e6).toLocaleString('en-US', {
         minimumFractionDigits: 6,
-      })} USD`);
+      })} USD`;
+    } catch (error) {
+      console.error("Failed to fetch estimate", error);
+    }
   };
 
   const setBalance = (balance) => {

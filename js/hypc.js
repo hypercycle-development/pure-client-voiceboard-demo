@@ -477,6 +477,7 @@ const provider = new ethers.BrowserProvider(window.ethereum);
     aims: () => AIMS,
     sendToNode: sendHyPC,
     fetchBalance: fetchBalance,
+    nodeFetch: nodeFetch,
     intAsHyPC: hypc_int => insertDecimal(hypc_int, HyPCDec),
     init: init,
     version: "0.0.8"
