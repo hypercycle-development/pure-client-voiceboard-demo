@@ -1,4 +1,5 @@
-const hypClient = HyPC.eth("http://44.197.199.9:8000", "HyPC Serverless Voiceboard");
+const node_url = CONFIG.NODE_URL || "http://52.88.200.3:8000";
+const hypClient = HyPC.eth(node_url, "USDC Serverless Voiceboard");
 
 const byId = id => document.getElementById(id);
 const bySel = selector => document.querySelector(selector);
@@ -67,11 +68,20 @@ const setup = () => {
   const inp_tx_val = byId("transaction_value");
   const btn_update_balance = byId("update_balance");
 
-  const updateEstimate = () => {
-    return hypClient.aims().tortoise_tts.fetchEstimate("speak", { text: txt_text.value, voice: "freeman" })
-      .then(estimate => lbl_estimate.innerHTML = `Estimate: ${(estimate.HyPC.estimated_cost / 1e6).toLocaleString('en-US', {
+  const updateEstimate = async () => {
+    try {
+      const estimate = await hypClient.aims().tortoise_tts.fetchEstimate("speak", { text: txt_text.value, voice: "freeman" });
+      const estimated_cost = estimate.HyPC.estimated_cost;
+      const response = await hypClient.nodeFetch("exchange_rates", {method : "GET"});
+      //TODO: cache the response either here or in the backend.
+      const usdcRate = response.find(rate => rate._id === "USDC-HyPC").rate;
+      const estimatedCostInUSDC = estimated_cost / usdcRate;
+      lbl_estimate.innerHTML = `Estimate: ${(estimatedCostInUSDC / 1e6).toLocaleString('en-US', {
         minimumFractionDigits: 6,
-      })} USD`);
+      })} USD`;
+    } catch (error) {
+      console.error("Failed to fetch estimate", error);
+    }
   };
 
   const setBalance = (balance) => {
@@ -83,12 +93,12 @@ const setup = () => {
   };
 
   const updateBalance = () => {
-    return hypClient.fetchBalance().then(data => setBalance(data.HyPC || 0));
+    return hypClient.fetchBalance().then(data => setBalance(data.USDC || 0));
   };
 
   btn_update_balance.addEventListener("click", ev => {
     ev.preventDefault();
-    return hypClient.sendToNode(parseInt(inp_tx_val.value)).then(updateBalance);
+    return hypClient.sendToNode(parseFloat(inp_tx_val.value)).then(updateBalance);
   });
 
   console.log("Getting initial estimate and balance...");
@@ -143,9 +153,12 @@ const setup = () => {
         btn_submit.removeAttribute("disabled");
       });
   });
+    // Call updateBalance every 15 seconds
+    setInterval(updateBalance, 15000);
 };
 
 window.addEventListener("DOMContentLoaded", () => {
   console.log("Setting up voiceboard...");
+  console.log("new version");
   setup();
 });

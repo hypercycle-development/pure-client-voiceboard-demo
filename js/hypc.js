@@ -1,6 +1,6 @@
 const HyPC = {eth: (NODE, appName) => {
   if (appName === undefined) {
-    appName = "HyPC Serverless App";
+    appName = "USDC Serverless App";
   }
 
   const insertDecimal = (integer, decimal) => {
@@ -261,8 +261,13 @@ const HyPC = {eth: (NODE, appName) => {
       usdc: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
     },
   };
+
+// ethers
+const provider = new ethers.BrowserProvider(window.ethereum);
+
+  //web3
   const web3 = new Web3(window.ethereum);
-  const Contract = new web3.eth.Contract(erc20ABI, CONTRACT_ADDRESSES.testnet.usdc);
+  const Contract = new web3.eth.Contract(erc20ABI, CONTRACT_ADDRESSES.mainnet.usdc);
 
   const nodeFetch = (endpoint, options) => fetch(`${NODE}/${endpoint}`, options).then(res => res.json());
 
@@ -298,26 +303,35 @@ const HyPC = {eth: (NODE, appName) => {
       "tx-sender": userAddress,
       "tx-origin": userAddress,
       "hypc-program": "",
-      "currency-type": "HyPC",
+      "currency-type": "USDC",
       "tx-driver": "ethereum",
       "tx-id": txId
     };
     return nodeFetch("balance", {method: "POST", headers: headers});
   };
 
-  const sendHyPC = (value) => {
+  const sendHyPC = async (value) => {
+    console.log("Sending");
     const nodeAddress = NODE_INFO.tm.address;
     const userAddress = USER_ACCOUNTS[0];
-    return Contract.methods.transfer(nodeAddress, value * (10 ** HyPCDec))
-      .send({from: userAddress})
-      .then(tx => updateNodeFromTxn(userAddress, tx.transactionHash, value))
-      .then(dat => {
-        const bal = dat.balance[userAddress];
-        if (dat.verified === "true") {
-          return {balance: bal, status: "ok"};
-        }
-        return {balance: bal, status: "error", error: dat.verification_message};
-      });
+    const signer = await provider.getSigner();
+    const ethersContract = new ethers.Contract(CONTRACT_ADDRESSES.mainnet.usdc, erc20ABI, signer);
+
+    try {
+      // Send USDC
+      const tx = await ethersContract.transfer(nodeAddress, value * (10 ** HyPCDec));
+      console.log('Transaction hash:', tx.hash);
+      
+      const dat = await updateNodeFromTxn(userAddress, tx.hash, value);
+      const bal = dat.balance[userAddress];
+
+      await provider.waitForTransaction(tx.hash);
+      return { balance: bal, status: "ok" };
+      
+    } catch (error) {
+      console.error("Transaction failed:", error);
+      return { status: "error", error: error.message };
+    }
   };
 
   const personalSign = (message, address) => {
@@ -342,7 +356,7 @@ const HyPC = {eth: (NODE, appName) => {
       "tx-sender": userAddress,
       "tx-origin": userAddress,
       "hypc-program": "",
-      "currency-type": "HyPC",
+      "currency-type": "USDC",
       "tx-driver": "ethereum"
     };
     if (options.txValue) {
@@ -382,7 +396,7 @@ const HyPC = {eth: (NODE, appName) => {
       "tx-sender": userAddress,
       "tx-origin": userAddress,
       "hypc-program": "",
-      "currency-type": "HyPC",
+      "currency-type": "USDC",
       "tx-driver": "ethereum",
     };
     return nodeFetch("info", {method: "GET", headers: headers})
@@ -422,6 +436,7 @@ const HyPC = {eth: (NODE, appName) => {
       .then(accounts => {
         const checks = accounts.map(acc => web3.utils.toChecksumAddress(acc));
         USER_ACCOUNTS = checks;
+        console.log(USER_ACCOUNTS);
         return true;
       });
   };
@@ -432,7 +447,7 @@ const HyPC = {eth: (NODE, appName) => {
       "tx-sender": userAddress,
       "tx-origin": userAddress,
       "hypc-program": "",
-      "currency-type": "HyPC",
+      "currency-type": "USDC",
       "tx-driver": "ethereum",
     };
     return nodeFetch("balance", {method: "GET", headers: headers})
@@ -462,6 +477,7 @@ const HyPC = {eth: (NODE, appName) => {
     aims: () => AIMS,
     sendToNode: sendHyPC,
     fetchBalance: fetchBalance,
+    nodeFetch: nodeFetch,
     intAsHyPC: hypc_int => insertDecimal(hypc_int, HyPCDec),
     init: init,
     version: "0.0.8"
