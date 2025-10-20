@@ -321,13 +321,13 @@ const provider = new ethers.BrowserProvider(window.ethereum);
       // Send USDC
       const tx = await ethersContract.transfer(nodeAddress, value * (10 ** HyPCDec));
       console.log('Transaction hash:', tx.hash);
-      
+
       const dat = await updateNodeFromTxn(userAddress, tx.hash, value);
       const bal = dat.balance[userAddress];
 
       await provider.waitForTransaction(tx.hash);
       return { balance: bal, status: "ok" };
-      
+
     } catch (error) {
       console.error("Transaction failed:", error);
       return { status: "error", error: error.message };
