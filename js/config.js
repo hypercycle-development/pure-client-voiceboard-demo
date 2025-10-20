@@ -1,4 +1,8 @@
-// config.js
 const CONFIG = {
-    NODE_URL: "http://52.88.200.3:8000"
-  };
+  NODE_URL: "",
+  NETWORKS: {
+    ETHEREUM: { chainId: 1, USDC_ADDRESS: "0xA0b8...6eB48", USDC_DECIMALS: 6 },
+    BASE:     { chainId: 8453, USDC_ADDRESS: "0x8335...b3C2", USDC_DECIMALS: 6 }
+  },
+  DEFAULT_NETWORK: "BASE" // or "ETHEREUM"
+};

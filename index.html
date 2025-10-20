@@ -1,194 +1,347 @@
 <html>
-
 <head>
-	<title>Voiceboard Demo</title>
-	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-	<script src="https://hypercycle-development.github.io/hypc-js/metamask-sdk.js"></script>
-	<script src="https://hypercycle-development.github.io/hypc-js/web3.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js" type="application/javascript"></script>
-	<script src="js/config.js"></script>
-	<script src="js/hypc.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/wavesurfer.js"></script>
-	<script src="js/core.js"></script>
-	<link rel="icon" type="image/x-icon" href="favicon.ico">
-	<script src="https://cdn.tailwindcss.com"></script>
-	<link href="core.css" rel="stylesheet" />
+  <title>Voiceboard Demo</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Fonts & UI -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Wallet libs -->
+  <script src="https://hypercycle-development.github.io/hypc-js/metamask-sdk.js"></script>
+  <script src="https://hypercycle-development.github.io/hypc-js/web3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js" type="application/javascript"></script>
+
+  <!-- App config + SDK -->
+  <script src="js/config.js"></script>
+  <script src="js/hypc.js"></script>
+
+  <!-- Audio -->
+  <script src="https://cdn.jsdelivr.net/npm/wavesurfer.js"></script>
+
+  <!-- Patched core (no auto-init; exposes window.setup) -->
+  <script src="js/core.js"></script>
+
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link href="core.css" rel="stylesheet" />
 </head>
 
-<body>
-	<div class="w-full bg-orange-200 text-orange-800 p-4 text-center z-50">
-		<p>Welcome to the Voiceboard Demo. This is an experimental prototype. Due to high usage, functionality may be
-			limited and performance may vary. Please do not reload the page while depositing USDC. If you encounter
-			other errors, refresh the page and try again.</p>
-	</div>
-	<div class="mx-auto px-6 min-w-[320px] max-w-[1200px]">
+<body class="relative">
+  <!-- Top notice -->
+  <div class="w-full bg-orange-200 text-orange-800 p-4 text-center z-50">
+    <p>Welcome to the Voiceboard Demo. This is an experimental prototype. Due to high usage, functionality may be
+      limited and performance may vary. Please do not reload the page while depositing USDC. If you encounter
+      other errors, refresh the page and try again.</p>
+  </div>
 
-		<div class="container mx-auto text-center">
-			<div class="flex flex-wrap mx-4 mt-5 mb-20">
-				<h2 id="title">Voiceboard</h2>
-			</div>
+  <!-- Wallet bar (top-right) -->
+  <div class="absolute top-[80px] right-0 p-4 z-40">
+    <div class="flex items-center gap-3 bg-white/80 backdrop-blur rounded-full px-3 py-1 shadow border">
+      <div id="walletInfo" class="text-sm text-gray-700 hidden">
+        <span id="walletShort" class="font-medium">—</span>
+        <span class="mx-1 text-gray-400">|</span>
+        <span class="text-gray-600">USDC: <span id="usdcBalance" class="font-semibold">—</span></span>
+      </div>
+      <button id="connectBtn"
+              class="px-3 py-1.5 text-sm rounded-full bg-blue-600 text-white hover:bg-blue-700 transition">
+        Connect Wallet
+      </button>
+      <button id="disconnectBtn"
+              class="px-3 py-1.5 text-sm rounded-full bg-gray-200 text-gray-800 hover:bg-gray-300 transition hidden">
+        Disconnect
+      </button>
+    </div>
+  </div>
 
-			<s= class="mx-4 mb-12">
-		</div>
-		<div class="flex mx-8 mb-3">
-			<audio id="audio" class="hidden" controls>
-				<source src="voiceboard--you-are-now-hearing-this.wav">
-			</audio>
-			<div class="w-full" id="waveform"></div>
-		</div>
-		<div class="flex justify-between mb-3">
-			<div></div>
-			<button
-				class="rounded-full  ml-7 w-14 h-14 grid place-items-center bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out"
-				title="Play/Pause" id="playPause">
-				<svg class="text-gray-100" fill="currentColor" id="playIcon" xmlns="http://www.w3.org/2000/svg" width="24"
-					height="24" viewBox="0 0 24 24">
-					<path d="M8 5v14l11-7z" />
-				</svg>
-				<svg class="text-gray-100" fill="currentColor" id="pauseIcon" xmlns="http://www.w3.org/2000/svg" width="24"
-					height="24" viewBox="0 0 24 24" style="display:none;">
-					<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-				</svg>
-			</button>
-			<a class="self-end" target="_blank" id="save_audio" href="voiceboard--you-are-now-hearing-this.wav">
-				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-					<polyline points="7 10 12 15 17 10"></polyline>
-					<line x1="12" y1="15" x2="12" y2="3"></line>
-				</svg>
-			</a>
-		</div>
-		<form>
-			<div class="flex flex-wrap mb-3 w-full">
-				<textarea id="text" class="w-full p-4 border border-gray-300 rounded" maxlength="100"
-					oninput="updateCharacterCount()">You are now hearing this in my voice</textarea>
-				<div class="text-sm text-gray-500" id="charCount">0/100</div>
-			</div>
-			<div class="flex mb-8">
-				<div class="grid gap-2 w-full">
-					<button id="submit"
-						class="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out">
-						Speak
-					</button>
-				</div>
-			</div>
-			<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full mb-8">
-				<div class="flex flex-col mb-3 w-full">
-					<div class="grid gap-2 w-full text-lg text-left" id="speak_estimate">
-						Estimate:
-					</div>
-					<div class="grid gap-2 w-full text-lg text-left" id="wallet_balance">
-						Balance:
-					</div>
-				</div>
-				<div class="grid grid-cols-2 gap-2 mb-3 w-full">
-					<div class="grid gap-2">
-						<input class="h-full p-3 border border-gray-300 rounded w-full" type="number" id="transaction_value"
-							placeholder="USD amount" />
-					</div>
-					<div class="grid gap-2">
-						<button id="update_balance"
-							class="h-full p-3 px-6 py-2.5 bg-blue-600 text-white font-medium leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out">
-							Send USD
-						</button>
-					</div>
-				</div>
-			</div>
-			<div class="flex flex-wrap mb-3 w-full justify-center" id="voice_radio_list">
-			</div>
-		</form>
-	</div>
-	<script>
+  <div class="mx-auto px-6 min-w-[320px] max-w-[1200px] pt-6">
+    <div class="container mx-auto text-center">
+      <div class="flex flex-wrap mx-4 mt-5 mb-20">
+        <h2 id="title">Voiceboard</h2>
+      </div>
+      <div class="mx-4 mb-12"></div>
+    </div>
 
-		function updateCharacterCount() {
-			const textArea = document.getElementById('text');
-			const charCount = document.getElementById('charCount');
-			const currentLength = textArea.value.length;
-			charCount.textContent = `${currentLength}/100`;
-		}
-		document.addEventListener('DOMContentLoaded', () => {
-			const playPauseButton = document.getElementById('playPause');
-			const playIcon = document.getElementById('playIcon');
-			const pauseIcon = document.getElementById('pauseIcon');
+    <div class="flex mx-8 mb-3">
+      <audio id="audio" class="hidden" controls>
+        <source src="voiceboard--you-are-now-hearing-this.wav">
+      </audio>
+      <div class="w-full" id="waveform"></div>
+    </div>
 
-			updateCharacterCount();
+    <div class="flex justify-between mb-3">
+      <div></div>
+      <button
+        class="rounded-full ml-7 w-14 h-14 grid place-items-center bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out"
+        title="Play/Pause" id="playPause">
+        <svg class="text-gray-100" fill="currentColor" id="playIcon" xmlns="http://www.w3.org/2000/svg" width="24"
+          height="24" viewBox="0 0 24 24">
+          <path d="M8 5v14l11-7z" />
+        </svg>
+        <svg class="text-gray-100" fill="currentColor" id="pauseIcon" xmlns="http://www.w3.org/2000/svg" width="24"
+          height="24" viewBox="0 0 24 24" style="display:none;">
+          <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+        </svg>
+      </button>
+      <a class="self-end" target="_blank" id="save_audio" href="voiceboard--you-are-now-hearing-this.wav" title="Download audio">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+      </a>
+    </div>
 
-			const wavesurfer = WaveSurfer.create({
-				container: '#waveform',
-				waveColor: 'violet',
-				progressColor: 'purple',
-				height: 150,
-				barWidth: 4,
-				barRadius: 4,
-			});
+    <form id="voiceboardForm">
+      <div class="flex flex-wrap mb-3 w-full">
+        <textarea id="text" class="w-full p-4 border border-gray-300 rounded" maxlength="100"
+          oninput="updateCharacterCount()">You are now hearing this in my voice</textarea>
+        <div class="text-sm text-gray-500" id="charCount">0/100</div>
+      </div>
 
-			const audioElement = document.querySelector('#audio');
-			const audioSourceElement = document.querySelector('#audio source');
+      <div class="flex mb-8">
+        <div class="grid gap-2 w-full">
+          <button id="submit"
+            class="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Connect wallet to enable" disabled>
+            Speak
+          </button>
+        </div>
+      </div>
 
-			async function updateDownloadLink() {
-				const downloadLink = document.getElementById('save_audio');
-				const audioSource = document.querySelector('#audio source');
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full mb-8">
+        <div class="flex flex-col mb-3 w-full">
+          <div class="grid gap-2 w-full text-lg text-left" id="speak_estimate">
+            Estimate:
+          </div>
+          <div class="grid gap-2 w-full text-lg text-left" id="wallet_balance">
+            Balance:
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mb-3 w-full">
+          <div class="grid gap-2">
+            <input class="h-full p-3 border border-gray-300 rounded w-full" type="number" id="transaction_value"
+              placeholder="USD amount" />
+          </div>
+          <div class="grid gap-2">
+            <button id="update_balance"
+              class="h-full p-3 px-6 py-2.5 bg-blue-600 text-white font-medium leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Connect wallet to enable" disabled>
+              Send USD
+            </button>
+          </div>
+        </div>
+      </div>
 
-				try {
-					// Obtener el ArrayBuffer del archivo de audio
-					const response = await fetch(audioSource.src);
-					const arrayBuffer = await response.arrayBuffer();
+      <div class="flex flex-wrap mb-3 w-full justify-center" id="voice_radio_list"></div>
+    </form>
+  </div>
 
-					// Crear un Blob con el ArrayBuffer
-					const blob = new Blob([arrayBuffer], { type: 'audio/wav' });
+  <!-- App wiring: connect/disconnect + top-bar balance -->
+  <script>
+    const ethersJs = window.ethers;
+    const el = {};
 
-					// Crear una URL para el Blob
-					const url = URL.createObjectURL(blob);
+    function shortAddr(addr) {
+      return addr ? (addr.slice(0, 6) + '…' + addr.slice(-4)) : '—';
+    }
 
-					// Actualizar el enlace de descarga
-					downloadLink.href = url;
-					downloadLink.download = 'audio.wav';
-				} catch (error) {
-					console.error('Error al obtener el audioBuffer:', error);
-				}
-			}
+  async function getUSDCBalance(address) {
+    try {
+      // 1) Detect chain
+      let chainId = null;
+      try {
+        const hex = await window.ethereum.request({ method: "eth_chainId" });
+        chainId = parseInt(hex, 16);
+      } catch { /* no MM yet */ }
 
-			async function loadWaveform() {
-				await wavesurfer.load(audioSourceElement.src); // Usa el src del elemento <audio>
+      // 2) Resolve network config (CONFIG.NETWORKS override supported)
+      const NETS = (window.CONFIG && window.CONFIG.NETWORKS) ? window.CONFIG.NETWORKS : {
+        ETHEREUM: { chainId: 1,    USDC_ADDRESS: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", USDC_DECIMALS: 6 },
+        BASE:     { chainId: 8453, USDC_ADDRESS: "0x833589fCD6eDb6E08f4c7C32D4f71b54b268b3C2", USDC_DECIMALS: 6 }
+      };
 
-				wavesurfer.play();
-				togglePlayPauseIcons(true);   // Muestra el ícono de Pausa
-				updateDownloadLink();
-			}
+      // Allow default via CONFIG.DEFAULT_NETWORK key name
+      const DEFAULT_KEY = (window.CONFIG && window.CONFIG.DEFAULT_NETWORK) || "ETHEREUM";
+      const entries = Object.entries(NETS);
+      let net = entries.find(([,v]) => v.chainId === chainId)?.[1] || NETS[DEFAULT_KEY];
 
-			// Carga inicial
-			wavesurfer.load('voiceboard--you-are-now-hearing-this.wav');
+      // 3) Prefer explicit CONFIG.USDC_ADDRESS/USDC_DECIMALS override (if provided)
+      let tokenAddr = (window.CONFIG && window.CONFIG.USDC_ADDRESS) || net.USDC_ADDRESS || null;
+      let tokenDecs = (window.CONFIG && Number.isFinite(window.CONFIG.USDC_DECIMALS))
+                        ? Number(window.CONFIG.USDC_DECIMALS)
+                        : (net.USDC_DECIMALS || 6);
 
-			// Cambia el ícono al hacer clic
-			playPauseButton.addEventListener('click', () => {
-				if (wavesurfer.isPlaying()) {
-					wavesurfer.pause();
-					togglePlayPauseIcons(false);  // Muestra el ícono de Play
-				} else {
-					loadWaveform();
-					console.log('Playing');
-				}
-			});
+      // 4) If no token address known, gracefully fallback to Node Manager balance
+      if (!tokenAddr) {
+        try {
+          // Signed per-user balance (requires your wrapped auth headers via hypClient)
+          const d = await hypClient.nodeFetch(`balances/user/${address}`, { method: "GET", requireAuth: true });
+          const usdc = (d?.USDC ?? d?.balance?.USDC ?? d?.balances?.USDC ?? 0);
+          return (Number(usdc) / 1e6).toString(); // return as string to match ethers.formatUnits style
+        } catch { /* fall through */ }
+        return null; // show "—"
+      }
 
+      // 5) On-chain token balance via ethers v6
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const abi = [
+        { name: "balanceOf", inputs: [{ name: "account", type: "address" }], outputs: [{ type: "uint256" }], stateMutability: "view", type: "function" },
+        { name: "decimals",  inputs: [], outputs: [{ type: "uint8" }], stateMutability: "view", type: "function" }
+      ];
+      const c = new ethers.Contract(tokenAddr, abi, provider);
 
-			// Cuando el audio termina, vuelve a mostrar el ícono de Play
-			wavesurfer.on('finish', () => {
-				togglePlayPauseIcons(false);  // Muestra el ícono de Play cuando termina
-			});
+      // Try contract decimals; fall back to configured
+      try { tokenDecs = Number(await c.decimals()) || tokenDecs; } catch {}
 
-			// Función para alternar los íconos
-			function togglePlayPauseIcons(isPlaying) {
-				if (isPlaying) {
-					playIcon.style.display = 'none';
-					pauseIcon.style.display = 'block';
-				} else {
-					playIcon.style.display = 'block';
-					pauseIcon.style.display = 'none';
-				}
-			}
-		});
-	</script>
+      const raw = await c.balanceOf(address);
+      return ethers.formatUnits(raw, tokenDecs); // string like "55.000000"
+    } catch (e) {
+      console.warn("USDC read failed:", e);
+      return null;
+    }
+  }
+
+    function enableAppControls(enabled) {
+      el.submitBtn.disabled = !enabled;
+      el.sendUsdBtn.disabled = !enabled;
+    }
+
+    async function connectFlow() {
+      // This calls into your SDK; it requests accounts, then does nodeInfo, etc.
+      await window.setup();  // setup() calls hypClient.init() internally
+
+      // Update top-bar wallet + USDC
+      const addr = (window.ethereum && window.ethereum.selectedAddress) || null;
+      if (addr) {
+        el.walletInfo.classList.remove('hidden');
+        el.walletShort.textContent = shortAddr(addr);
+        try {
+          const usdc = await getUSDCBalance(addr);
+          el.usdcTop.textContent = usdc ?? '—';
+        } catch {
+          el.usdcTop.textContent = '—';
+        }
+      }
+      // Enable SPEAK / SEND buttons after connect/setup
+      enableAppControls(true);
+    }
+
+    function disconnectFlow() {
+      // Simple approach: reload to clear any in-memory SDK/client state
+      const url = new URL(location.href);
+      url.searchParams.set('_dc', Date.now().toString());
+      location.replace(url.toString());
+    }
+
+    // ---- DOM Ready ----
+    document.addEventListener('DOMContentLoaded', () => {
+      el.connectBtn  = document.getElementById('connectBtn');
+      el.disconnectBtn = document.getElementById('disconnectBtn');
+      el.walletInfo  = document.getElementById('walletInfo');
+      el.walletShort = document.getElementById('walletShort');
+      el.usdcTop     = document.getElementById('usdcBalance');
+
+      el.submitBtn   = document.getElementById('submit');
+      el.sendUsdBtn  = document.getElementById('update_balance');
+
+      // prevent full page post
+      document.getElementById('voiceboardForm').addEventListener('submit', e => e.preventDefault());
+
+      el.connectBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        el.connectBtn.disabled = true;
+        try {
+          await connectFlow();
+          el.connectBtn.classList.add('hidden');
+          el.disconnectBtn.classList.remove('hidden');
+        } catch (err) {
+          console.warn('Connect failed:', err);
+          el.connectBtn.disabled = false;
+        }
+      });
+
+      el.disconnectBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        disconnectFlow();
+      });
+    });
+  </script>
+
+  <!-- Waveform + player (unchanged) -->
+  <script>
+    function updateCharacterCount() {
+      const textArea = document.getElementById('text');
+      const charCount = document.getElementById('charCount');
+      charCount.textContent = `${textArea.value.length}/100`;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const playPauseButton = document.getElementById('playPause');
+      const playIcon = document.getElementById('playIcon');
+      const pauseIcon = document.getElementById('pauseIcon');
+
+      updateCharacterCount();
+
+      const wavesurfer = WaveSurfer.create({
+        container: '#waveform',
+        waveColor: 'violet',
+        progressColor: 'purple',
+        height: 150,
+        barWidth: 4,
+        barRadius: 4,
+      });
+
+      const audioSourceElement = document.querySelector('#audio source');
+
+      async function updateDownloadLink() {
+        const downloadLink = document.getElementById('save_audio');
+        const audioSource = document.querySelector('#audio source');
+        try {
+          const response = await fetch(audioSource.src);
+          const arrayBuffer = await response.arrayBuffer();
+          const blob = new Blob([arrayBuffer], { type: 'audio/wav' });
+          const url = URL.createObjectURL(blob);
+          downloadLink.href = url;
+          downloadLink.download = 'audio.wav';
+        } catch (error) {
+          console.error('Error fetching audioBuffer:', error);
+        }
+      }
+
+      async function loadWaveform() {
+        await wavesurfer.load(audioSourceElement.src);
+        wavesurfer.play();
+        togglePlayPauseIcons(true);
+        updateDownloadLink();
+      }
+
+      wavesurfer.load('voiceboard--you-are-now-hearing-this.wav');
+
+      playPauseButton.addEventListener('click', () => {
+        if (wavesurfer.isPlaying()) {
+          wavesurfer.pause();
+          togglePlayPauseIcons(false);
+        } else {
+          loadWaveform();
+        }
+      });
+
+      wavesurfer.on('finish', () => {
+        togglePlayPauseIcons(false);
+      });
+
+      function togglePlayPauseIcons(isPlaying) {
+        if (isPlaying) {
+          playIcon.style.display = 'none';
+          pauseIcon.style.display = 'block';
+        } else {
+          playIcon.style.display = 'block';
+          pauseIcon.style.display = 'none';
+        }
+      }
+    });
+  </script>
 </body>
-
 </html>
